@@ -172,7 +172,7 @@ taxa.pca <- ade4::dudi.pca(taxa_mtx, scannf=FALSE, nf =61,
 
 For cytokines:
 
-- Center and scale cytokines data to work with PCA on the correlation matrix $\Sigma_Y=\text{Cov}Y$.
+- Center and scale cytokines data to work with PCA on the correlation matrix $\Sigma_Y=\text{Corr}Y$.
 - To normalize the magnitude, divide each value of $Y$ by the total variance: $\sqrt{\mbox{tr}(\Sigma_Y)}$.
 
 ```{r}

@@ -86,3 +86,5 @@ combined_Cyto_mtx <- momspiCyto_mtx[, colnames(momspiCyto_mtx) %in% combined_sam
 #Ensure that samples are in rows and variables are in columns
 combined_16S_mtx %<>% t
 combined_Cyto_mtx %<>% t
+
+coia <- COIA_from_2(combined_16S_mtx, combined_Cyto_mtx)
