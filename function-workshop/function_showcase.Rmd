@@ -1,0 +1,89 @@
+---
+title: "Function Showcase"
+author: "Margaret Turner"
+date: "3/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# `colData` manipulation
+
+Experiment objects are un-`tidy`. Due to the underlying expectations of how information is stored in a `tidy` dataset, most `dplyr` functions (e.g. `mutate()`, `summarize()`, `filter()`) specifically operate on either columns or rows. The following functions are meant to provide more flexible manipulation of un-`tidy` experimental data.
+
+## `arrange_columns()`
+
+The ultimate goal of this function is to allow columns of assays within a `MultiAssayExperiment` to be rearranged by the observations of their `colData`.
+
+**TODO**:
+
+- Finished function should take a MAE and perform on *selected* assays.
+- Flexible `by` argument.
+  - Including `desc()` option.
+- Needs support for SEs with multiple assays or data not stored in `listData`.
+
+```{r}
+# DEFINE FUNCTIONS
+
+arrange_columns <- function(.data, by1, by2) {
+  UseMethod("arrange_columns")
+}
+
+# ------------------------------------------------------------------------------
+# This function takes a MAE, arranges the columns of each assay, and returns a
+# MAE with the arranged assays
+
+arrange_columns.MultiAssayExperiment <- function(.data, by1, by2) {
+  var1 <- deparse(substitute(by1))
+  var2 <- deparse(substitute(by2))
+  z <- length(.data@ExperimentList)
+  copypasta <- .data
+  for (i in 1:z) { 
+    copypasta[[i]] <- arrange_columns_helper(.data[[i]], {{ by1 }}, {{ by2 }}, var1, var2)
+  }
+  return(copypasta)
+}
+
+# ------------------------------------------------------------------------------
+# A variant of arrange_columns.SE that is called from inside the arrange_columns.MAE function
+# Must handle data masking differently than arrange_columns.SE, though the two could theoretically be merged
+
+arrange_columns_helper <- function(.data, by1, by2, var1, var2) {
+  assay_name <- names(.data@assays)
+  new_assay <- .data@assays@data@listData[[1]][order(.data@colData[[var1]], 
+                                                     .data@colData[[var2]])]
+  new_assay_list <- new_assay %>% 
+    matrix(., nrow = nrow(rowData(.data)),
+           ncol = nrow(.data@colData)) %>% list(.)
+  names(new_assay_list) <- assay_name
+  new_coldata <- .data@colData %>% as.data.frame() %>% arrange({{ by1 }}, {{ by2 }})
+  reordered_experiment <- SummarizedExperiment(assays = new_assay_list,
+                                               colData = new_coldata,
+                                               rowData = rowData(.data))
+  return(reordered_experiment)
+}
+
+# ------------------------------------------------------------------------------
+# 
+
+arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
+  var1 <- deparse(substitute(by1))
+  var2 <- deparse(substitute(by2))
+  assay_name <- names(.data@assays)
+  new_assay <- .data@assays@data@listData[[1]][order(.data@colData[[var1]], 
+                                                     .data@colData[[var2]])]
+  new_assay_list <- new_assay %>% 
+    matrix(., nrow = nrow(rowData(.data)),
+            ncol = nrow(.data@colData)) %>% list(.)
+  names(new_assay_list) <- assay_name
+  new_coldata <- .data@colData %>% as.data.frame() %>% arrange({{ by1 }}, {{ by2 }})
+  reordered_experiment <- SummarizedExperiment(assays = new_assay_list,
+                                             colData = new_coldata,
+                                             rowData = rowData(.data))
+  return(reordered_experiment)
+}
+```
+
+

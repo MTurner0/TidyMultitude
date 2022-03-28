@@ -4,30 +4,74 @@ library(magrittr)
 library(SummarizedExperiment)
 library(MultiAssayExperiment)
 library(phyloseq)
+library(tidySummarizedExperiment)
 
 #Load data
 library(HMP2Data)
 
 
 #Define functions
-prep <- function(data){
+
+
+prep <- function(data, scale = c(TRUE, FALSE)){
+  if(missing(scale)){scale <- TRUE}
   #Center and scale
-  scaled <- scale(data, center = TRUE, scale = TRUE)
+  scaled <- scale(data, center = TRUE, scale = scale)
   #Fast trace computation
   tr <- sum(scaled * scaled)/(dim(scaled)[1]-1)
-  #Normalize
-  normed <- scaled/sqrt(tr)
+  #Normalize magnitude
+  scaled/sqrt(tr)
 }
 
-COIA_from_2 <- function(data1, data2){
+COIA_from_2 <- function(data1, data2, data1_type = c("cov.mat", "corr.mat"),
+                        data2_type = c("cov.mat", "corr.mat")){
+  #Handle missing types
+  if(missing(data1_type)){data1_type <- "corr.mat"}
+  if(missing(data2_type)){data2_type <- "corr.mat"}
+  #Set args
+  s1 <- if(data1_type == "corr.mat") TRUE else FALSE
+  s2 <- if(data2_type == "corr.mat") TRUE else FALSE
   #Preprocess data
-  data1 <- prep(data1)
-  data2 <- prep(data2)
-  data1_pca <- ade4::dudi.pca(data1, scannf = FALSE, nf = 61, center = FALSE, 
+  data1 <- prep(data1, scale = s1)
+  data2 <- prep(data2, scale = s2)
+  data1_pca <- dudi.pca(data1, scannf = FALSE, nf = 61, center = FALSE, 
                               scale = FALSE)
-  data2_pca <- ade4::dudi.pca(data2, scannf = FALSE, nf = 61, center = FALSE,
+  data2_pca <- dudi.pca(data2, scannf = FALSE, nf = 61, center = FALSE,
                               scale = FALSE)
-  coin <- ade4::coinertia(data1_pca, data2_pca, scannf = FALSE, nf = 2)
+  coinertia(data1_pca, data2_pca, scannf = FALSE, nf = 2)
+}
+
+
+#Extending COIA to more than two tables?
+COIA <- function(data, types, 
+                 option = c("inertia", "lambda1", "uniform", "internal")){
+  #Checks for:
+  #Data is list of datasets as matrices or dataframes
+  if(!(class(data) == "list")) stop("Data must be list of matrices or dataframes.")
+  #Set types to all corr.mat if not specified
+  if(missing(types)){types <- rep("corr.mat", length(data))}
+  #If types are set but number of types specified does not equal number of datasets
+  if(length(data) != length(types)) stop("Need type specified for each dataset.")
+  #Only possible inputs for types should be corr.mat or cov.mat
+  if(!all(unique(types) %in% c("corr.mat", "cov.mat"))) stop("corr.mat and cov.mat are the only known types.")
+  
+  #Create T/F vector to use in `scale` based on desired matrix type
+  internal_test_fun <- function(a){if(a == "corr.mat") TRUE else FALSE}
+  s <- sapply(types, internal_test_fun, USE.NAMES = FALSE)
+  
+  #Run PCA on every dataset
+  pca_res <- list()
+  for(i in 1:length(data)){
+    data[[i]] <- prep(data[[i]], scale = s[i])
+    pca_res[[i]] <- dudi.pca(data[[i]], scannf = FALSE, nf = 30, 
+                             center = FALSE, scale = FALSE)
+  }
+  
+  #Combine PCA results into `ktab` object
+  tabby_kat <- ktab.list.dudi(pca_res)
+  
+  #Run multiple COIA on `ktab` object
+  mcoa(tabby_kat, option = option, scannf = FALSE, nf = length(data)+1)
 }
 
 #16S rRNA data
@@ -50,10 +94,17 @@ momspi16S <- phyloseq(otu_table(momspi16S_mtx, taxa_are_rows = TRUE),
                       sample_data(momspi16S_samp))
 
 #Manually construct MOMS-PI Cytokines SummarizedExperiment object
-momspiCytokines <- SummarizedExperiment(momspiCyto_mtx,
+momspiCyto <- SummarizedExperiment(momspiCyto_mtx,
                                         colData = momspiCyto_samp,
                                         rowData = data.frame(cytokine = 
                                                                rownames(momspiCyto_mtx)))
+#Construct MOMS-PI 16S rRNA SummarizedExperiment object
+momspi16S <- SummarizedExperiment(momspi16S_mtx,
+                                     colData = momspi16S_samp,
+                                     rowData = momspi16S_tax)
+
+momspicy <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
+                                                    cyto = momspiCyto))
 
 #Order samples by visit number
 momspi16S_samp <- momspi16S_samp[with(momspi16S_samp, order(subject_id, sample_body_site, visit_number))]

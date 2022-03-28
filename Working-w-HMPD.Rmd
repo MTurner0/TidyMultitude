@@ -127,7 +127,7 @@ table(combined_samp$sample_body_site)#all vaginal samples
 #select 16S data for those samples
 combined_16S_phyloseq <- subset_samples(momspi16S_phyloseq, file_name %in% combined_samp$file_name.x)
 
-#get rif of otus that are not observed in any sample for this subset
+#get rid of otus that are not observed in any sample for this subset
 combined_16S_phyloseq %<>%
     taxa_sums() %>%
     is_greater_than(0) %>%
@@ -136,7 +136,7 @@ combined_16S_mtx <- otu_table(combined_16S_phyloseq)
 
 #can get same data directly from matrices, but less convenient because phyloseq has taxonomy info
 #combined_16S_mtx <- momspi16S_mtx[, colnames(momspi16S_mtx) %in% combined_samp$file_name.x]
-#get rif of otus that are not observed in any sample for this subset
+#get rid of otus that are not observed in any sample for this subset
 #combined_16S_mtx <- combined_16S_mtx[apply(combined_16S_mtx, 1, nnzero) >0, ]
 combined_Cyto_mtx <- momspiCyto_mtx[, colnames(momspiCyto_mtx) %in% combined_samp$file_name.y ]
 dim(combined_Cyto_mtx)
@@ -200,12 +200,49 @@ RV
 **Where are they getting this PlotCoinVars function??? I'll make one myself...**
 
 ```{r}
-#p.vars <- PlotCoinVars(coin, tab1 = "taxa", tab2 = "cytokines", 
-#             Labels1 = NULL, #colnames(combined_16S_mtx)
-#             Labels2 = colnames(combined_Cyto_mtx),
-#             label = TRUE,PtSize=2,LblSize=3,
-#             hjust = 0, vjust = -1.5)
-#p.vars
+PlotCoinVars <- function(coin, tab1 = "Table1", tab2 = "Table2", 
+                         Labels1 = NULL, Labels2 = NULL, label = TRUE,
+                         hjust = 0, vjust = -1.5, PtSize = 2, LblSize = 2){
+
+  if(is.null(Labels1)){Labels1 <- 1:nrow(coin$co)} #tab1 labels
+  if(is.null(Labels2)){Labels2 <- 1:nrow(coin$li)} #tab2 labels
+  
+  #extract scores for each table
+  x = colnames(coin$co)[1]
+  y = colnames(coin$co)[2]
+  
+  #first table data
+  df1 <- data.frame(coin$co$Comp1, coin$co$Comp2, Labels1, rep(tab1, nrow(coin$co)))
+  rownames(df1) <- rownames(coin$co)
+  names(df1) <- c(x,y,  "Labels", "Table")
+  
+  #second table data
+  df2 <- data.frame(coin$li$Axis1, coin$li$Axis2, Labels2, rep(tab2, nrow(coin$li)))
+  rownames(df2) <- rownames(coin$li)
+  names(df2) <- c(x,y, "Labels", "Table")
+  
+  #conbine two tables for plotting
+  df <- rbind(df1, df2)
+  ord_map = aes_string(x = x, y = y, color = "Table", shape = "Table")
+  
+  CW_X <- ggplot(df, ord_map) + geom_point( size = PtSize) + 
+          scale_color_manual(values = c("red", "blue")) + theme_bw()+
+          xlab("") + ylab("") +theme(legend.title=element_blank())
+  
+  if(label == TRUE) { 
+      #Last thing: Fix order of labels
+      lbl_map = aes_string(x = x, y = y, label = "Labels")  
+      CW_X <- CW_X + geom_text(data = df, mapping = lbl_map, size = LblSize, vjust = vjust, hjust = hjust)
+  }
+  return(CW_X)
+}
+
+p.vars <- PlotCoinVars(coin, tab1 = "taxa", tab2 = "cytokines", 
+             Labels1 = NULL, #colnames(combined_16S_mtx)
+             Labels2 = colnames(combined_Cyto_mtx),
+             label = TRUE,PtSize=2,LblSize=3,
+             hjust = 0, vjust = -1.5)
+p.vars
 ```
 
 
