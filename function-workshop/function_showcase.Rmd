@@ -39,11 +39,13 @@ arrange_columns.MultiAssayExperiment <- function(.data, by1, by2) {
   var1 <- deparse(substitute(by1))
   var2 <- deparse(substitute(by2))
   z <- length(.data@ExperimentList)
-  copypasta <- .data
+  reordered_mae <- .data
   for (i in 1:z) { 
-    copypasta[[i]] <- arrange_columns_helper(.data[[i]], {{ by1 }}, {{ by2 }}, var1, var2)
+    # Each experiment within the MAE has arrange_columns called on it
+    # Note that the deparsed feature names are "smuggled" into the inner function by var1, var2
+    reordered_mae[[i]] <- arrange_columns_helper(.data[[i]], {{ by1 }}, {{ by2 }}, var1, var2)
   }
-  return(copypasta)
+  return(reordered_mae)
 }
 
 # ------------------------------------------------------------------------------
@@ -66,9 +68,10 @@ arrange_columns_helper <- function(.data, by1, by2, var1, var2) {
 }
 
 # ------------------------------------------------------------------------------
-# 
+# This function takes a SummarizedExperiment, arranges its columns, and returns a repackaged SummarizedExperiment
 
 arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
+  # Need text feature names for order()
   var1 <- deparse(substitute(by1))
   var2 <- deparse(substitute(by2))
   assay_name <- names(.data@assays)
@@ -78,6 +81,7 @@ arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
     matrix(., nrow = nrow(rowData(.data)),
             ncol = nrow(.data@colData)) %>% list(.)
   names(new_assay_list) <- assay_name
+  # Can use embracing to arrange colData
   new_coldata <- .data@colData %>% as.data.frame() %>% arrange({{ by1 }}, {{ by2 }})
   reordered_experiment <- SummarizedExperiment(assays = new_assay_list,
                                              colData = new_coldata,
@@ -86,4 +90,51 @@ arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
 }
 ```
 
+
+# Handling sparse data
+
+## `trim_empty_*`
+
+Sequencing data often produces large but sparse matrices. To save space and time, it may be worthwhile to remove empty columns and/or rows.
+
+**TODO**:
+
+- This function "cheats" right now: it filters out rows where the *sum* is zero. Replace `sum()` with a function to filter out rows that are all zeros.
+- Only `trim_empty_rows()` has been made so far, but should be straightforward to translate to `trim_empty_columns()`.
+- Currently, only selecting one experiment from an MAE is supported. Finished function should allow selection of anywhere from 1 to all.
+- Needs support for SEs with multiple assays or data not stored in `listData`.
+
+```{r}
+# DEFINE FUNCTIONS
+
+trim_empty_rows <- function(.data, experiment) {
+  UseMethod("trim_empty_rows")
+}
+
+#-------------------------------------------------------------------------------
+# This function takes a MAE object, removes all empty rows within a specified experiment, then returns the altered MAE
+
+trim_empty_rows.MultiAssayExperiment <- function(.data, experiment) {
+  exp_name <- deparse(substitute(experiment))
+  .data[[exp_name]] <- trim_empty_rows.SummarizedExperiment(.data[[exp_name]])
+  return(.data)
+}
+
+#------------------------------------------------------------------------------
+# This function takes a SE object, removes rows with all zeros
+
+trim_empty_rows.SummarizedExperiment <- function(.data) {
+  # Create a vector indicating which rows of the matrix and rowData are nonzero
+  nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, sum) > 0
+  new_rowdata <- rowData(.data)[nonempty_indices, ]
+  new_assay <- .data@assays@data@listData[[1]][nonempty_indices, ]
+  new_assay_list <- new_assay %>% list(.)
+  names(new_assay_list) <- names(.data@assays)
+  trimmed_experiment <- SummarizedExperiment(assays = new_assay_list,
+                                             colData = .data@colData,
+                                             rowData = new_rowdata)
+  return(trimmed_experiment)
+}
+
+```
 

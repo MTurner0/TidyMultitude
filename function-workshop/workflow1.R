@@ -25,7 +25,7 @@ momspi16S <- SummarizedExperiment(assays = list(counts = momspi16S_mtx),
 combo <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
                                                  cyto = momspiCyto))
 
-#Order columns by visit_number within subject_id
+#ORDER COLUMNS BY SUBJECT_ID AND VISIT
 
 arrange_columns <- function(.data, by1, by2) {
   UseMethod("arrange_columns")
@@ -76,4 +76,35 @@ arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
                                              colData = new_coldata,
                                              rowData = rowData(.data))
   return(reordered_experiment)
+}
+
+
+# DROP OTUs WITH ZERO OBSERVATIONS
+
+trim_empty_rows <- function(.data, experiment) {
+  UseMethod("trim_empty_rows")
+}
+
+trim_empty_rows.MultiAssayExperiment <- function(.data, experiment) {
+  exp_name <- deparse(substitute(experiment))
+  .data[[exp_name]] <- trim_empty_rows.SummarizedExperiment(.data[[exp_name]])
+  return(.data)
+}
+
+trim_empty_rows.SummarizedExperiment <- function(.data) {
+  # Create a vector indicating which rows of the matrix and rowData are nonzero
+  nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, sum) > 0
+  new_rowdata <- rowData(.data)[nonempty_indices, ]
+  new_assay <- .data@assays@data@listData[[1]][nonempty_indices, ]
+  new_assay_list <- new_assay %>% list(.)
+  names(new_assay_list) <- names(.data@assays)
+  trimmed_experiment <- SummarizedExperiment(assays = new_assay_list,
+                                             colData = .data@colData,
+                                             rowData = new_rowdata)
+  return(trimmed_experiment)
+}
+
+
+dummy <- function(x, y) {
+  missing(y)
 }
