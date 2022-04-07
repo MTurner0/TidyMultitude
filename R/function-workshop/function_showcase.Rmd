@@ -20,6 +20,7 @@ The ultimate goal of this function is to allow columns of assays within a `Multi
 **TODO**:
 
 - Finished function should take a MAE and perform on *selected* assays.
+- `arrange_cols.SE` also uses the helper function.
 - Flexible `by` argument.
   - Including `desc()` option.
 - Needs support for SEs with multiple assays or data not stored in `listData`.
