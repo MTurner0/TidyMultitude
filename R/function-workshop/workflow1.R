@@ -91,9 +91,13 @@ trim_empty_rows.MultiAssayExperiment <- function(.data, experiment) {
   return(.data)
 }
 
-trim_empty_rows.SummarizedExperiment <- function(.data) {
+trim_empty_rows.SummarizedExperiment <- function(.data, counts = TRUE) {
   # Create a vector indicating which rows of the matrix and rowData are nonzero
-  nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, sum) > 0
+  if (counts) {
+    nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, sum) > 0
+  } else {
+    nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, nonzero)
+  }
   new_rowdata <- rowData(.data)[nonempty_indices, ]
   new_assay <- .data@assays@data@listData[[1]][nonempty_indices, ]
   new_assay_list <- new_assay %>% list(.)
@@ -105,6 +109,8 @@ trim_empty_rows.SummarizedExperiment <- function(.data) {
 }
 
 
-dummy <- function(x, y) {
-  missing(y)
+nonzero <- function(x) {
+  any(x != 0)
 }
+
+
