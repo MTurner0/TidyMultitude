@@ -114,3 +114,13 @@ nonzero <- function(x) {
 }
 
 
+scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
+  if (center) {
+    x <- sweep(x, 1, apply(x, 1, mean))
+  }
+  if (scale) {
+    scales <- apply(x, 1, sd)
+    for(i in 1:nrow(x)) { x[i, ] <- x[i, ]/scales[i] }
+  }
+  return(x)
+}

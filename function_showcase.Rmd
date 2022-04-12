@@ -147,3 +147,27 @@ nonzero <- function(x) {
 
 ```
 
+
+# Assistants
+
+Functions that do not necessarily fit the `TidyMultitude` "&oelig;uvre" but help with functionality.
+
+## `scale_rowwise`
+
+Scales and centers the rows of matrix-like objects.
+
+```{r}
+scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
+  # Will only center if specified
+  if (center) {
+    x <- sweep(x, 1, apply(x, 1, mean))
+  }
+  # Will only scale if specified
+  if (scale) {
+    scales <- apply(x, 1, sd)
+    for(i in 1:nrow(x)) { x[i, ] <- x[i, ]/scales[i] }
+  }
+  return(x)
+}
+```
+
