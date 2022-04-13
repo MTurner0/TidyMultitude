@@ -3,7 +3,7 @@
 #' @description Sequencing data often produces large but sparse matrices. To save space and time, it may be worthwhile to remove empty columns and/or rows.
 #' 
 #' @param .data Either a `MultiAssayExperiment` or a `SummarizedExperiment`.
-#' @param counts If `TRUE`, empty rows can be checked using `sum(x) > 1`, which is faster than `any(x != 0)`.
+#' @param counts If `TRUE`, empty rows can be checked using `sum(x) > 0`, which is faster than `any(x != 0)`.
 #' 
 #' @export
 trim_empty_rows <- function(.data, experiment, counts = TRUE) {
