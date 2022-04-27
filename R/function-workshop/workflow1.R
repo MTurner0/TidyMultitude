@@ -131,3 +131,12 @@ select.MultiAssayExperiment <- function(.data, ...) {
   experiment_vector <- rlang::quos(...) %>% map(rlang::quo_text) %>% unlist()
   return(.data[, , experiment_vector]) 
 }
+
+#Pull an SE from an MAE
+pull.MultiAssayExperiment <- function(.data, var = -1) {
+  if(is.numeric(var) & var < 0) {
+    # Convert negative index to positive index
+    var <- experiments(.data) %>% length() + 1 + var
+  }
+  return(.data[, , var][[1]])
+}

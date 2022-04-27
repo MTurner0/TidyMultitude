@@ -2,11 +2,13 @@
 
 S3method(arrange_columns,MultiAssayExperiment)
 S3method(arrange_columns,SummarizedExperiment)
+S3method(pull,MultiAssayExperiment)
 S3method(select,MultiAssayExperiment)
 S3method(trim_empty_rows,MultiAssayExperiment)
 S3method(trim_empty_rows,SummarizedExperiment)
 export(arrange_columns)
 export(arrange_columns_helper)
+export(pull)
 export(scale_rowwise)
 export(select)
 export(trim_empty_rows)
