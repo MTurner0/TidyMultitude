@@ -113,7 +113,7 @@ nonzero <- function(x) {
   any(x != 0)
 }
 
-
+#Create scale_rowwise function
 scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
   if (center) {
     x <- sweep(x, 1, apply(x, 1, mean))
@@ -123,4 +123,11 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
     for(i in 1:nrow(x)) { x[i, ] <- x[i, ]/scales[i] }
   }
   return(x)
+}
+
+#Select a subset of SEs from an MAE
+select.MultiAssayExperiment <- function(.data, ...) {
+  # Convert `...` into a vector of strings of experiment names
+  experiment_vector <- rlang::quos(...) %>% map(rlang::quo_text) %>% unlist()
+  return(.data[, , experiment_vector]) 
 }
