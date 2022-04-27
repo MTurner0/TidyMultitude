@@ -15,7 +15,7 @@ trim_empty_rows(.data, experiment, counts = TRUE)
 \arguments{
 \item{.data}{Either a \code{MultiAssayExperiment} or a \code{SummarizedExperiment}.}
 
-\item{counts}{If \code{TRUE}, empty rows can be checked using \code{sum(x) > 1}, which is faster than \code{any(x != 0)}.}
+\item{counts}{If \code{TRUE}, empty rows can be checked using \code{sum(x) > 0}, which is faster than \code{any(x != 0)}.}
 }
 \description{
 Sequencing data often produces large but sparse matrices. To save space and time, it may be worthwhile to remove empty columns and/or rows.
