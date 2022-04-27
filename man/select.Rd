@@ -3,7 +3,7 @@
 \name{select}
 \alias{select}
 \alias{select.MultiAssayExperiment}
-\title{Select \code{SummarizedExperiment}s from a \code{MultiAssayExperiment}}
+\title{Subset a \code{MultiAssayExperiment} by \code{SummarizedExperiment}s.}
 \usage{
 select(.data, ...)
 
@@ -12,10 +12,14 @@ select(.data, ...)
 \arguments{
 \item{.data}{A \code{MultiAssayExperiment}.}
 
-\item{...}{The names of the \code{SummarizedExperiment}s to be kept.}
+\item{...}{The names of the \code{SummarizedExperiment}s to be kept, unquoted.}
 }
 \value{
-A \code{MultiAssayExperiment} containing the selected \code{SummarizedExperiment}s.
+A \code{MultiAssayExperiment} containing the selected
+\code{SummarizedExperiment}s. The output has the following properties:
+\itemize{\item \code{colData}, \code{rowData}, and \code{assay}s of selected experiments
+are not affected. \item Output experiments are a subset of input
+experiments, potentially with a different order.}
 }
 \description{
 
