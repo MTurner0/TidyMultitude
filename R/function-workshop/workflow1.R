@@ -142,7 +142,62 @@ pull.MultiAssayExperiment <- function(.data, var = -1) {
 }
 
 #SE
-filter_columns <- function(.data, ...) {
-  new_colData <- colData(.data) %>% as_tibble() %>% filter(...)
-  return(new_colData)
+filter_columns.MultiAssayExperiment <- function(.data, ...) {
+  z <- experiments(.data) %>% length()
+  filter_args <- as.list(substitute(list(...)))
+  filtered_mae <- .data
+  for(i in 1:z) {
+    filtered_mae[[i]] <- filter_columns_helper(.data[[i]], filter_args)
+  }
+  return(filtered_mae)
 }
+
+filter_columns_depreciated <- function(.data, ...) {
+  new_colData <- colData(.data) %>% 
+    as_tibble() %>% 
+    mutate(inds = 1:nrow(.)) %>% 
+    filter(...)
+  new_assay_list <- assay(.data)[, new_colData$inds] %>% list(.)
+  names(new_assay_list) <- names(.data@assays)
+  new_se <- SummarizedExperiment(assays = new_assay_list,
+                                 colData = new_colData %>% select(-inds),
+                                 rowData = rowData(.data))
+  return(new_se)
+}
+
+filter_columns.SummarizedExperiment <- function(.data, ...) {
+  filter_args <- as.list(substitute(list(...)))
+  return(filter_columns_helper(.data, filter_args))
+}
+
+filter_columns_helper <- function(.data, list_of_args) {
+  #First element of list_of_args will be the word "list" -- need to replace
+  list_of_args[[1]] <- colData(.data) %>% 
+    as_tibble() %>% 
+    #Add columns of indices that will be used to subset assay columns
+    mutate(inds = 1:nrow(.))
+  filtered_colData <- do.call(filter, args = list_of_args)
+  filtered_assay_list <- assay(.data)[, filtered_colData$inds] %>% list(.)
+  names(filtered_assay_list) <- names(.data@assays)
+  filtered_se <- SummarizedExperiment(assays = filtered_assay_list,
+                                      #Remove inds column
+                                      colData = filtered_colData %>% select(-inds),
+                                      rowData = rowData(.data))
+  return(filtered_se)
+}
+
+dummy <- function(.data, ...) {
+  expr <- as.list(substitute(list(...)))
+  return(dummy_inner(.data, expr))
+}
+
+dummy_inner <- function(.data, list_of_args) {
+  #First element of list_of_args will be the word "list" -- need to replace
+  list_of_args[[1]] <- colData(.data) %>% 
+    as_tibble() %>% 
+    #Add columns of indices that will be used to subset assay columns
+    mutate(inds = 1:nrow(.))
+  filtered_colData <- do.call(filter, args = list_of_args)
+  return(filtered_colData)
+}
+
