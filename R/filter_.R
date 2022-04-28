@@ -46,7 +46,8 @@ filter_colData_helper <- function(.data, list_of_args) {
   names(filtered_assay_list) <- names(.data@assays)
   filtered_se <- SummarizedExperiment(assays = filtered_assay_list,
                                       #Remove inds column
-                                      colData = filtered_colData %>% select(-inds),
+                                      colData = filtered_colData %>% 
+                                        dplyr::select(-inds),
                                       rowData = rowData(.data))
   return(filtered_se)
 }
