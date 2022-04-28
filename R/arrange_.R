@@ -34,7 +34,6 @@ arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
   return(reordered_se)
 }
 
-#' @rdname arrange_columns
 #' @export
 arrange_columns_helper <- function(.data, by1, by2, var1, var2) {
   assay_name <- names(.data@assays)

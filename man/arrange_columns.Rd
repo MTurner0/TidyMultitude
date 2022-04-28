@@ -4,7 +4,6 @@
 \alias{arrange_columns}
 \alias{arrange_columns.MultiAssayExperiment}
 \alias{arrange_columns.SummarizedExperiment}
-\alias{arrange_columns_helper}
 \title{Arrange columns of a \code{MultiAssayExperiment} or \code{SummarizedExperiment}}
 \usage{
 arrange_columns(.data, by1, by2)
@@ -12,8 +11,6 @@ arrange_columns(.data, by1, by2)
 \method{arrange_columns}{MultiAssayExperiment}(.data, by1, by2)
 
 \method{arrange_columns}{SummarizedExperiment}(.data, by1, by2)
-
-arrange_columns_helper(.data, by1, by2, var1, var2)
 }
 \arguments{
 \item{.data}{Either a \code{MultiAssayExperiment} or \code{SummarizedExperiment} object.}
