@@ -138,5 +138,11 @@ pull.MultiAssayExperiment <- function(.data, var = -1) {
     # Convert negative index to positive index
     var <- experiments(.data) %>% length() + 1 + var
   }
-  return(.data[, , var][[1]])
+  return(.data[[var]])
+}
+
+#SE
+filter_columns <- function(.data, ...) {
+  new_colData <- colData(.data) %>% as_tibble() %>% filter(...)
+  return(new_colData)
 }

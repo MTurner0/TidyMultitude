@@ -15,7 +15,7 @@ arrange_columns <- function(.data, by1, by2) {
 arrange_columns.MultiAssayExperiment <- function(.data, by1, by2) {
   var1 <- deparse(substitute(by1))
   var2 <- deparse(substitute(by2))
-  z <- length(.data@ExperimentList)
+  z <- experiments(.data) %>% length()
   reordered_mae <- .data
   for (i in 1:z) { 
     # Each experiment within the MAE has arrange_columns called on it
@@ -38,7 +38,7 @@ arrange_columns.SummarizedExperiment <- function(.data, by1, by2) {
 #' @export
 arrange_columns_helper <- function(.data, by1, by2, var1, var2) {
   assay_name <- names(.data@assays)
-  new_assay <- .data@assays@data@listData[[1]][order(.data@colData[[var1]], 
+  new_assay <- assays(.data)[[1]][order(.data@colData[[var1]], 
                                                      .data@colData[[var2]])]
   new_assay_list <- new_assay %>% 
     matrix(., nrow = nrow(rowData(.data)),
