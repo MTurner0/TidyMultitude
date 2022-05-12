@@ -20,7 +20,9 @@ select <- function(.data, ...) {
 #' @export
 select.MultiAssayExperiment <- function(.data, ...) {
   # Convert `...` into a vector of strings of experiment names
-  experiment_vector <- rlang::quos(...) %>% map(rlang::quo_text) %>% unlist()
+  experiment_vector <- rlang::quos(...) %>% 
+    map(rlang::quo_text) %>% 
+    unlist()
   return(.data[, , experiment_vector]) 
 }
 
@@ -48,6 +50,7 @@ pull <- function(.data, var = -1) {
 #' @export
 pull.MultiAssayExperiment <- function(.data, var = -1) {
   if(is.numeric(var) & var < 0) {
+    
     # Convert negative index to positive index
     var <- experiments(.data) %>% length() + 1 + var
   }
