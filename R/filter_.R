@@ -18,36 +18,18 @@ filter_colData <- function(.data, ...) {
 #' @rdname filter_colData
 #' @export
 filter_colData.MultiAssayExperiment <- function(.data, ...) {
-  z <- experiments(.data) %>% length()
   filter_args <- as.list(substitute(list(...)))
   filtered_mae <- .data
-  for(i in 1:z) {
-    filtered_mae[[i]] <- filter_colData_helper(.data[[i]], filter_args)
+  for(i in 1:seq_along(experiments(.data))) {
+    filtered_mae[[i]] <- tidy_colData_helper(.data[[i]], filter, filter_args)
   }
-  return(filtered_mae)
+  filtered_mae
 }
 
 #' @rdname filter_colData
 #' @export
 filter_colData.SummarizedExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
-  return(filter_colData_helper(.data, filter_args))
+  tidy_colData_helper(.data, filter, filter_args)
 }
 
-#' @export
-filter_colData_helper <- function(.data, list_of_args) {
-  #First element of list_of_args will be the word "list" -- need to replace
-  list_of_args[[1]] <- colData(.data) %>% 
-    as_tibble() %>% 
-    #Add columns of indices that will be used to subset assay columns
-    mutate(inds = 1:nrow(.))
-  filtered_colData <- do.call(filter, args = list_of_args)
-  filtered_assay_list <- assay(.data)[, filtered_colData$inds] %>% list(.)
-  names(filtered_assay_list) <- names(.data@assays)
-  filtered_se <- SummarizedExperiment(assays = filtered_assay_list,
-                                      #Remove inds column
-                                      colData = filtered_colData %>% 
-                                        dplyr::select(-inds),
-                                      rowData = rowData(.data))
-  return(filtered_se)
-}

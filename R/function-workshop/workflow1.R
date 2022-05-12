@@ -27,23 +27,63 @@ combo <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
 
 #ORDER COLUMNS BY SUBJECT_ID AND VISIT
 
-arrange_columns <- function(.data, by1, by2) {
-  UseMethod("arrange_columns")
-}
-
-arrange_columns.MultiAssayExperiment <- function(.data, by1, by2) {
-  var1 <- deparse(substitute(by1))
-  var2 <- deparse(substitute(by2))
-  z <- length(.data@ExperimentList)
-  copypasta <- .data
-  for (i in 1:z) { 
-    copypasta[[i]] <- arrange_columns_helper(.data[[i]], {{ by1 }}, {{ by2 }}, var1, var2)
+beta2 <- function(.data, ...) {
+  arrange_args <- as.list(substitute(list(...)))
+  reordered_mae <- .data
+  for(i in seq_along(experiments(.data))) {
+    reordered_mae[[i]] <- tidy_colData_helper(.data[[i]], arrange, arrange_args)
   }
-  return(copypasta)
+  reordered_mae
 }
 
 # A variant of arrange_columns.SE that is called from inside the arrange_columns.MAE function
 # Must handle data masking differently than arrange_columns.SE, though the two could theoretically be merged
+
+beta <- function(.data, ...) {
+  arrange_args <- as.list(substitute(list(...)))
+  tidy_colData_helper(.data, arrange, arrange_args)
+}
+
+beta_helper <- function(.data, list_of_args) {
+  # First element of list_of_args will be the word "list" -- replace with
+  # colData
+  list_of_args[[1]] <- colData(.data) %>% 
+    as_tibble() %>% 
+    # Add columns of indices that will be used to subset assay columns
+    mutate(inds = 1:nrow(.))
+  arranged_colData <- do.call(arrange, args = list_of_args)
+  # Subset columns of assay data by rows of colData
+  arranged_assay_list <- assay(.data)[, arranged_colData$inds] %>% 
+    list(.)
+  names(arranged_assay_list) <- names(.data@assays)
+  arranged_se <- SummarizedExperiment(assays = arranged_assay_list,
+                                      #Remove inds column
+                                      colData = arranged_colData %>% 
+                                        dplyr::select(-inds),
+                                      rowData = rowData(.data))
+  return(arranged_se)
+}
+
+tidy_colData_helper <- function(.data, FUN, list_of_args) {
+  # First element of list_of_args will be the word "list" -- replace with
+  # colData
+  list_of_args[[1]] <- colData(.data) %>% 
+    as_tibble() %>% 
+    # Add columns of indices that will be used to subset assay columns
+    # Use a name that is unlikely to appear in colData
+    mutate(QjWTNFtWmSBc8XS = 1:nrow(.))
+  modded_colData <- do.call(FUN, args = list_of_args)
+  # Subset columns of assay data by rows of colData
+  modded_assay_list <- assay(.data)[, modded_colData$QjWTNFtWmSBc8XS] %>% 
+    list(.)
+  names(modded_assay_list) <- assays(.data) %>% 
+    names()
+  SummarizedExperiment(assays = modded_assay_list, 
+                       # Remove indexing column
+                       colData = modded_colData %>% 
+                         dplyr::select(-QjWTNFtWmSBc8XS),
+                       rowData = rowData(.data))
+}
 
 arrange_columns_helper <- function(.data, by1, by2, var1, var2) {
   assay_name <- names(.data@assays)
@@ -165,9 +205,9 @@ filter_columns_depreciated <- function(.data, ...) {
   return(new_se)
 }
 
-filter_columns.SummarizedExperiment <- function(.data, ...) {
+gamma <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
-  return(filter_columns_helper(.data, filter_args))
+  return(tidy_colData_helper(.data, filter, filter_args))
 }
 
 filter_columns_helper <- function(.data, list_of_args) {
@@ -186,9 +226,13 @@ filter_columns_helper <- function(.data, list_of_args) {
   return(filtered_se)
 }
 
-dummy <- function(.data, ...) {
+dummy <- function(...) {
   expr <- as.list(substitute(list(...)))
-  return(dummy_inner(.data, expr))
+  return(expr)
+}
+
+dummy_2 <- function(hello = c("lorem", "ipsum", "sit", "amet")) {
+  return(rlang::arg_match(hello))
 }
 
 dummy_inner <- function(.data, list_of_args) {
@@ -200,4 +244,3 @@ dummy_inner <- function(.data, list_of_args) {
   filtered_colData <- do.call(filter, args = list_of_args)
   return(filtered_colData)
 }
-
