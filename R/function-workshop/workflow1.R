@@ -131,27 +131,43 @@ trim_empty_rows.MultiAssayExperiment <- function(.data, experiment) {
   return(.data)
 }
 
-trim_empty_rows.SummarizedExperiment <- function(.data, counts = TRUE) {
-  # Create a vector indicating which rows of the matrix and rowData are nonzero
+delta <- function(.data, counts = TRUE) {
+  # Create a vector identifying rows
   if (counts) {
-    nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, sum) > 0
+    nonempty_indices <- (sapply(as.list(assays(.data)), rowSums) > 0) %>% 
+      apply(., 1, any)
   } else {
-    nonempty_indices <- apply(.data@assays@data@listData[[1]], 1, nonzero)
+    
+    # Define internal functions
+    matrix_nonzero <- function(x) {
+      apply(x, 1, nonzero)
+    }
+    nonzero <- function(x) {
+      any(x != 0)
+    }
+    
+    nonempty_indices <- sapply(as.list(assays(.data)), matrix_nonzero) %>% 
+      apply(., 1, any)
   }
+  
   new_rowdata <- rowData(.data)[nonempty_indices, ]
-  new_assay <- .data@assays@data@listData[[1]][nonempty_indices, ]
-  new_assay_list <- new_assay %>% list(.)
-  names(new_assay_list) <- names(.data@assays)
-  trimmed_experiment <- SummarizedExperiment(assays = new_assay_list,
-                                             colData = .data@colData,
-                                             rowData = new_rowdata)
-  return(trimmed_experiment)
+  new_assay_list <- purrr::map(.x = as.list(assays(.data)),
+                          ~ .x[nonempty_indices, ])
+  names(new_assay_list) <- assays(.data) %>% names()
+  SummarizedExperiment(assays = new_assay_list,
+                       colData = colData(.data),
+                       rowData = new_rowdata)
 }
 
+matrix_nonzero <- function(x) {
+  apply(x, 1, nonzero)
+}
 
 nonzero <- function(x) {
   any(x != 0)
 }
+
+
 
 #Create scale_rowwise function
 scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
