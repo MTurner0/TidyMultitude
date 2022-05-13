@@ -20,7 +20,7 @@ filter_colData <- function(.data, ...) {
 filter_colData.MultiAssayExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
   filtered_mae <- .data
-  for(i in 1:seq_along(experiments(.data))) {
+  for(i in seq_along(experiments(.data))) {
     filtered_mae[[i]] <- tidy_colData_helper(.data[[i]], filter, filter_args)
   }
   filtered_mae
