@@ -2,11 +2,27 @@
 % Please edit documentation in R/mutate-transmute.R
 \name{mutate}
 \alias{mutate}
+\alias{mutate.MultiAssayExperiment}
+\alias{mutate.SummarizedExperiment}
+\alias{transmute}
+\alias{transmute.MultiAssayExperiment}
+\alias{transmute.SummarizedExperiment}
 \title{Create, modify, and delete assays}
 \usage{
 mutate(.data, ...)
+
+\method{mutate}{MultiAssayExperiment}(.data, experiment, ...)
+
+\method{mutate}{SummarizedExperiment}(.data, ...)
+
+transmute(.data, experiment, ...)
+
+\method{transmute}{MultiAssayExperiment}(.data, experiment, ...)
+
+\method{transmute}{SummarizedExperiment}(.data, ...)
 }
 \description{
-\code{mutate()} adds new assays and preserves existing ones. New
-assays overwrite existing assays of the same name.
+\code{mutate()} adds new assays and preserves existing ones.
+\code{transmute()} adds new assays and drops existing ones. New assays overwrite
+existing assays of the same name.
 }

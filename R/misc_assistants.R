@@ -1,11 +1,12 @@
 #' @title Scaling and Centering of Rows in Matrix-like Objects
-#' 
-#' @description Extends `base::scale` to center and/or scale the rows of a numeric matrix.
-#' 
+#'
+#' @description Extends `base::scale` to center and/or scale the rows of a
+#'   numeric matrix.
+#'
 #' @param x a numeric matrix(like object), such as an assay.
-#' @param center a logical value indicating whether rows should be centered. 
+#' @param center a logical value indicating whether rows should be centered.
 #' @param scale a logical value indicating whether rows should be scaled.
-#' 
+#'
 #' @export
 scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
   
@@ -51,11 +52,14 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
 }
 
 #' @export
-quosure_helper <- function(.data, quosure_list) {
+quosure_helper <- function(.data, quosure_list, drop_unused = FALSE) {
   for (i in seq_along(quosure_list)) {
     assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
                                                          data = assays(.data) %>% 
                                                            as.list())
+  }
+  if (drop_unused) {
+    assays(.data) <- assays(.data)[names(quosure_list)]
   }
   .data
 }

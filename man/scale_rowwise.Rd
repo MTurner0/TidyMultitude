@@ -14,5 +14,6 @@ scale_rowwise(x, center = TRUE, scale = TRUE)
 \item{scale}{a logical value indicating whether rows should be scaled.}
 }
 \description{
-Extends \code{base::scale} to center and/or scale the rows of a numeric matrix.
+Extends \code{base::scale} to center and/or scale the rows of a
+numeric matrix.
 }
