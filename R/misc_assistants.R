@@ -32,14 +32,14 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
     
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
-    mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
+    dplyr::mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
   
   # Transform colData with specified function
   modded_colData <- do.call(FUN, args = list_of_args)
   
   # Subset columns of assay data by rows of colData
-  modded_assay_list <- assay(.data)[, modded_colData$id_helper_QjWTNFtWmSBc8XS] %>% 
-    list(.)
+  modded_assay_list <- purrr::map(.x = as.list(assays(.data)),
+                               ~ .x[, modded_colData$id_helper_QjWTNFtWmSBc8XS])
   names(modded_assay_list) <- assays(.data) %>% 
     names()
   
@@ -53,7 +53,7 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
 #' @export
 quosure_helper <- function(.data, quosure_list) {
   for (i in seq_along(quosure_list)) {
-    assays(.data)[[names(quosure_list)[i]]] <- eval_tidy(quosure_list[[i]],
+    assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
                                                          data = assays(.data) %>% 
                                                            as.list())
   }
