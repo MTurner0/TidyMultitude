@@ -5,7 +5,8 @@
 #'   match.
 #'
 #' @param .data A `SummarizedExperiment` or `MultiAssayExperiment`.
-#' @param ... <\code{\link[dplyr]{dplyr_data_masking}}> Expressions that return
+#' 
+#' @param ... Expressions that return
 #'   a logical value, and are defined in terms of the variables in `.data`. If
 #'   multiple expressions are included, they are combined with the `&` operator.
 #'   Only rows for which all conditions evaluate to `TRUE` are kept.
