@@ -15,7 +15,7 @@ filter_colData(.data, ...)
 \arguments{
 \item{.data}{A \code{SummarizedExperiment} or \code{MultiAssayExperiment}.}
 
-\item{...}{<\code{\link[dplyr]{dplyr_data_masking}}> Expressions that return
+\item{...}{Expressions that return
 a logical value, and are defined in terms of the variables in \code{.data}. If
 multiple expressions are included, they are combined with the \code{&} operator.
 Only rows for which all conditions evaluate to \code{TRUE} are kept.}
