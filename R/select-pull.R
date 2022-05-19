@@ -1,6 +1,6 @@
 #' @title Subset a `MultiAssayExperiment` by `SummarizedExperiment`s.
 #'
-#' @description 
+#' @description Select `SummarizedExperiment`s in a `MultiAssayExperiment`.
 #'
 #' @param .data A `MultiAssayExperiment`.
 #' @param ... The names of the `SummarizedExperiment`s to be kept, unquoted.
@@ -40,7 +40,8 @@ select.MultiAssayExperiment <- function(.data, ...) {
 #'   (e.g. if \code{\link{select}} has been used to select a single experiment
 #'   from the `MultiAssayExperiment`), then this will be chosen.
 #'
-#' @return
+#' @return A `SummarizedExperiment`.
+#' 
 #' @export
 pull <- function(.data, var = -1) {
   UseMethod("pull")

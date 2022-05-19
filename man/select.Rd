@@ -22,5 +22,5 @@ are not affected. \item Output experiments are a subset of input
 experiments, potentially with a different order.}
 }
 \description{
-
+Select \code{SummarizedExperiment}s in a \code{MultiAssayExperiment}.
 }

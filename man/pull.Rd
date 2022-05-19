@@ -22,7 +22,7 @@ The default returns the last experiment. If there is only one experiment
 from the \code{MultiAssayExperiment}), then this will be chosen.}
 }
 \value{
-
+A \code{SummarizedExperiment}.
 }
 \description{
 \code{pull()} is similar to \verb{[[]]}.
