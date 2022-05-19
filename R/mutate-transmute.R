@@ -18,7 +18,7 @@ mutate.MultiAssayExperiment <- function(.data, experiment, ...) {
                                              mutate_quosures)
   .data
 }
-
+# 
 #' @rdname mutate
 #' @export
 mutate.SummarizedExperiment <- function(.data, ...) {
