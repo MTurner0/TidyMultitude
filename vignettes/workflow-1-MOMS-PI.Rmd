@@ -24,7 +24,9 @@ library(knitr)
 library(kableExtra)
 ```
 
-This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`. 
+This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`.
+
+## Setup
 
 ```{r}
 data("momspiCyto_mtx")
@@ -35,7 +37,7 @@ momspiCyto <- SummarizedExperiment(assays = list(cyto_conc = momspiCyto_mtx),
                                                         rownames(momspiCyto_mtx)))
 ```
 
-
+`MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we will assemble this data into a `SummarizedExperiment`.
 
 ```{r}
 data("momspi16S_mtx")
@@ -46,15 +48,19 @@ momspi16S <- SummarizedExperiment(assays = list(counts = momspi16S_mtx),
                                   rowData = momspi16S_tax)
 ```
 
+From these two `SummarizedExperiments`, we can create the `MultiAssayExperiment` object to operate upon.
 
 ```{r}
 momspi_data <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
                                                        cyto = momspiCyto))
 ```
 
+## Co-inertia analysis
+
+First, we will create a function that we can use later in `transmute()`.
 
 ```{r}
-# Define my preprocessing function
+# Define a preprocessing function
 prep <- function(data, scale = c(TRUE, FALSE)){
   # Note that the data is transposed so that these steps are performed rowwise
   scaled <- scale(t(data), center = TRUE, scale = scale) # Center and scale
@@ -64,7 +70,7 @@ prep <- function(data, scale = c(TRUE, FALSE)){
 }
 ```
 
-
+Next, the following operations on the `MultiAssayExperiment` object will perform all of the workshop steps between the text "Combine 16S and cytokines data" and "Combine the tables using co-inertia."
 
 ```{r}
 pca_list <- momspi_data %>% 
@@ -98,6 +104,7 @@ pca_list <- momspi_data %>%
   })
 ```
 
+We can see that we obtain the same results as in the workshop when performing the co-inertia analysis (available through `ade4`).
 
 ```{r}
 coin <- ade4::coinertia(dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
@@ -118,7 +125,54 @@ kable(head(coin$li),
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
 ```
 
-```{r}
+### Visualization of output
 
+```{r, echo=FALSE}
+# PlotCoinVars function from workshop -- modified to include a graph title
+PlotCoinVars <- function(coin, title,
+                         tab1 = "Table1", tab2 = "Table2", 
+                         Labels1 = NULL, Labels2 = NULL, label = TRUE,
+                         hjust = 0, vjust = -1.5, PtSize = 2, LblSize = 2){
+
+  if(is.null(Labels1)){Labels1 <- 1:nrow(coin$co)} #tab1 labels
+  if(is.null(Labels2)){Labels2 <- 1:nrow(coin$li)} #tab2 labels
+  
+  #extract scores for each table
+  x = colnames(coin$co)[1]
+  y = colnames(coin$co)[2]
+  
+  #first table data
+  df1 <- data.frame(coin$co$Comp1, coin$co$Comp2, Labels1, rep(tab1, nrow(coin$co)))
+  rownames(df1) <- rownames(coin$co)
+  names(df1) <- c(x,y,  "Labels", "Table")
+  
+  #second table data
+  df2 <- data.frame(coin$li$Axis1, coin$li$Axis2, Labels2, rep(tab2, nrow(coin$li)))
+  rownames(df2) <- rownames(coin$li)
+  names(df2) <- c(x,y, "Labels", "Table")
+  
+  #conbine two tables for plotting
+  df <- rbind(df1, df2)
+  ord_map = aes_string(x = x, y = y, color = "Table", shape = "Table")
+  
+  CW_X <- ggplot(df, ord_map) + geom_point( size = PtSize) + 
+          scale_color_manual(values = c("red", "blue")) + theme_bw() +
+          labs(title = title, x = "", y = "") + 
+          theme(legend.title=element_blank())
+  
+  if(label == TRUE) { 
+      #Last thing: Fix order of labels
+      lbl_map = aes_string(x = x, y = y, label = "Labels")  
+      CW_X <- CW_X + geom_text(data = df, mapping = lbl_map, size = LblSize, vjust = vjust, hjust = hjust)
+  }
+  return(CW_X)
+}
+
+PlotCoinVars(coin, title = "TidyMultitude workflow",
+             tab1 = "taxa", tab2 = "cytokines", 
+             Labels1 = NULL,
+             Labels2 = rownames(coin$li),
+             label = TRUE,PtSize=2,LblSize=3,
+             hjust = 0, vjust = -1.5)
 ```
 
