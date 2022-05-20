@@ -63,40 +63,6 @@ momspiCyto <- momspiCytokines()
 momspiCyto
 ```
 
-IBD Data
-
-```{r}
-#Load 16S data as a matrix, rows are SILVA IDs, columns are sample names:
-data("IBD16S_mtx")
-
-#Load the SILVA taxonomy table as a matrix, rows are SILVA IDs, columns are taxonomic ranks:
-data("IBD16S_tax")
-
-#Load the 16S sample annotation data as a matrix, rows are samples, columns are annotations:
-data("IBD16S_samp")
-
-#The IBD phyloseq object can be loaded as follows.
-IBD <- IBD16S()
-IBD
-```
-
-T2D
-
-```{r}
-#Load 16S data as a matrix, rows are Greengene IDs, columns are sample names:
-data("T2D16S_mtx")
-
-#Load the Greengenes taxonomy table as a matrix, rows are Greengene IDs, columns are taxonomic ranks:
-data("T2D16S_tax")
-
-#Load the 16S sample annotation data as a matrix, rows are samples, columns are annotations:
-data("T2D16S_samp")
-
-#The T2D phyloseq object can be loaded like so.
-T2D <- T2D16S()
-T2D
-```
-
 ## COIA
 
 ### Pre-processing
@@ -200,7 +166,8 @@ RV
 **Where are they getting this PlotCoinVars function??? I'll make one myself...**
 
 ```{r}
-PlotCoinVars <- function(coin, tab1 = "Table1", tab2 = "Table2", 
+PlotCoinVars <- function(coin, title,
+                         tab1 = "Table1", tab2 = "Table2", 
                          Labels1 = NULL, Labels2 = NULL, label = TRUE,
                          hjust = 0, vjust = -1.5, PtSize = 2, LblSize = 2){
 
@@ -226,8 +193,9 @@ PlotCoinVars <- function(coin, tab1 = "Table1", tab2 = "Table2",
   ord_map = aes_string(x = x, y = y, color = "Table", shape = "Table")
   
   CW_X <- ggplot(df, ord_map) + geom_point( size = PtSize) + 
-          scale_color_manual(values = c("red", "blue")) + theme_bw()+
-          xlab("") + ylab("") +theme(legend.title=element_blank())
+          scale_color_manual(values = c("red", "blue")) + theme_bw() +
+          labs(title = title, x = "", y = "") + 
+          theme(legend.title=element_blank())
   
   if(label == TRUE) { 
       #Last thing: Fix order of labels

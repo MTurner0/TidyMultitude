@@ -1,5 +1,6 @@
 ---
 title: "Multi-omics data integration: MOMS-PI example"
+author: "Margaret Turner"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Multi-omics data integration: MOMS-PI example}
@@ -14,12 +15,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE}
 library(tidyverse)
 library(MultiAssayExperiment)
 library(TidyMultitude)
 library(ade4)
+library(knitr)
+library(kableExtra)
 ```
+
+This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`. 
 
 ```{r}
 data("momspiCyto_mtx")
@@ -29,6 +34,7 @@ momspiCyto <- SummarizedExperiment(assays = list(cyto_conc = momspiCyto_mtx),
                                    rowData = data.frame(cytokine = 
                                                         rownames(momspiCyto_mtx)))
 ```
+
 
 
 ```{r}
@@ -76,7 +82,8 @@ pca_list <- momspi_data %>%
   # For phy16S data: Convert taxa to proportions
   # Then, by row -- center (but do not scale) and normalize magnitude
   transmute(phy16S,
-            cov = (counts/colSums(counts)) %>% 
+            cov = (t(counts)/colSums(counts))%>% 
+              t() %>% 
               prep(., scale = FALSE)) %>% 
   # For cytokines data: by row -- center, 
   transmute(cyto,
@@ -93,9 +100,25 @@ pca_list <- momspi_data %>%
 
 
 ```{r}
-coin <- ade4::coinertia(dudiX = pca_list[[1]], dudiY = pca_list[[2]], 
+coin <- ade4::coinertia(dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
                         scannf = FALSE, nf = 2)
+coin$RV
+```
+
+```{r}
+kable(head(coin$co),
+      digits = 5)%>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
 ```
 
 
+```{r}
+kable(head(coin$li),
+      digits = 5)%>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+```
+
+```{r}
+
+```
 
