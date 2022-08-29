@@ -17,115 +17,156 @@ knitr::opts_chunk$set(
 
 ```{r setup, message = FALSE}
 library(tidyverse)
+library(magrittr)
+library(phyloseq)
 library(MultiAssayExperiment)
-library(TidyMultitude)
-library(ade4)
 library(knitr)
 library(kableExtra)
+
+library(TidyMultitude)
 ```
 
 This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`.
 
+First, we will walk through the steps of the workflow used in the HMP workshop. Then, we will demonstrate how these steps can be simplified using `TidyMultitude`.
+
 ## Setup
 
+Both workflows will use data from the HMP2Data
+
 ```{r}
+# Load 16S rRNA data
+data("momspi16S_mtx")
+data("momspi16S_samp")
+data("momspi16S_tax")
+
+# Load cytokines data
 data("momspiCyto_mtx")
 data("momspiCyto_samp")
+```
+
+### Objects for HMP workshop workflow
+
+For the cytokine data, the co-inertia analysis only relies on the sample information matrix `momspiCyto_samp` and the cytokines matrix `momspiCyto_mtx`, so those will be left as is.
+
+The 16S rRNA data can be contained in a `phyloseq` object.
+
+```{r}
+# Construct phyloseq object
+momspi16S_phyloseq <- phyloseq(otu_table(momspi16S_mtx, taxa_are_rows = TRUE),
+                               sample_data(momspi16S_samp),
+                               tax_table(momspi16S_tax))
+momspi16S_phyloseq
+```
+
+
+### Objects for TidyMultitude workflow
+
+For the TidyMultitude workflow, we will need a `MultiAssayExperiment` object containing `SummarizedExperiment` objects representing the cytokine and 16S rRNA data, respectively. `MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we must make a `SummarizedExperiment` for our 16S rRNA data.
+
+```{r}
+# Construct cytokines SummarizedExperiment
 momspiCyto <- SummarizedExperiment(assays = list(cyto_conc = momspiCyto_mtx),
                                    colData = momspiCyto_samp,
                                    rowData = data.frame(cytokine = 
                                                         rownames(momspiCyto_mtx)))
-```
 
-`MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we will assemble this data into a `SummarizedExperiment`.
-
-```{r}
-data("momspi16S_mtx")
-data("momspi16S_samp")
-data("momspi16S_tax")
+# Construct 16S SummarizedExperiment
 momspi16S <- SummarizedExperiment(assays = list(counts = momspi16S_mtx),
                                   colData = momspi16S_samp,
                                   rowData = momspi16S_tax)
-```
 
-From these two `SummarizedExperiments`, we can create the `MultiAssayExperiment` object to operate upon.
-
-```{r}
+# Construct MultiAssayExperiment
 momspi_data <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
                                                        cyto = momspiCyto))
+
+momspi_data
 ```
 
-## Co-inertia analysis
-
-First, we will create a function that we can use later in `transmute()`.
+## HMP workshop workflow
 
 ```{r}
-# Define a preprocessing function
-prep <- function(data, scale = c(TRUE, FALSE)){
-  # Note that the data is transposed so that these steps are performed rowwise
-  scaled <- scale(t(data), center = TRUE, scale = scale) # Center and scale
-  tr <- sum(scaled * scaled)/(dim(scaled)[1]-1) # Fast trace computation
-  processed <- scaled/sqrt(tr) # Normalize magnitude
-  return(t(processed)) # Rotate back
-}
+# Combine 16S and cytokines data
+
+# order both sets by visit number within a subject
+momspi16S_samp <- momspi16S_samp[
+  with(momspi16S_samp, order(subject_id, sample_body_site, visit_number)),
+] 
+
+momspiCyto_samp <- momspiCyto_samp[
+  with(momspiCyto_samp, order(subject_id, sample_body_site, visit_number)),
+]
+
+# Select data collected at the same visit
+combined_samp <- merge(momspi16S_samp, momspiCyto_samp, 
+                       by = c("subject_id", "sample_body_site", 
+                        "project_name", "study_full_name",
+                        "subject_gender", "subject_race",
+                        "visit_number"))
+
+# Select data from first visit only
+combined_samp <- combined_samp[combined_samp$visit_number ==  1,]
+
+#select 16S data for those samples
+combined_16S_phyloseq <- subset_samples(momspi16S_phyloseq, file_name %in% combined_samp$file_name.x)
+
+# get rid of otus that are not observed in any sample for this subset
+combined_16S_phyloseq %<>%
+    taxa_sums() %>%
+    is_greater_than(0) %>%
+    prune_taxa(combined_16S_phyloseq)
+combined_16S_mtx <- otu_table(combined_16S_phyloseq)
+
+
+combined_Cyto_mtx <- momspiCyto_mtx[, colnames(momspiCyto_mtx) %in% combined_samp$file_name.y ]
+
+# Make sure that samples are in rows and variables (taxa and cytokines) are in columns.
+combined_16S_mtx <- t(combined_16S_mtx)
+combined_Cyto_mtx <- t(combined_Cyto_mtx)
+
+#Taxa are converted to proportions.
+combined_16S_mtx <- combined_16S_mtx/apply(combined_16S_mtx, 1, sum)
+
+# Center 16S data to perform PCA on the covariance matrix
+taxa_mtx <- scale(combined_16S_mtx, center = TRUE, scale = FALSE)
+
+# Center and scale cytokines data to perform PCA on the correlation matrix
+cyto_mtx <- scale(combined_Cyto_mtx, center = TRUE, scale = TRUE)
+
+# Normalize magnitude and perform PCA
+taxa_tr <- sum(taxa_mtx*taxa_mtx)/(dim(taxa_mtx)[1]-1)
+taxa_mtx <- taxa_mtx/sqrt(taxa_tr)
+taxa.pca <- ade4::dudi.pca(taxa_mtx, scannf=FALSE, nf =61,
+                     center = FALSE, scale = FALSE)
+
+cyto_tr <- sum(cyto_mtx*cyto_mtx)/(dim(cyto_mtx)[1]-1)
+cyto_mtx <- cyto_mtx/sqrt(cyto_tr)
+cyto.pca <- ade4::dudi.pca(cyto_mtx, scannf=FALSE, nf =61,
+                     center = FALSE, scale = FALSE)
+
+# Co-inertia is available through R package ade4; it takes ade4 PCA objects and performs joint eigendecomposition.
+coin_hmp <- ade4::coinertia(taxa.pca, cyto.pca, scannf = FALSE, nf = 2)
+
+# RV coefficient – measure of similarity between 16S and cytokines tables
+coin_hmp$RV
+#> [1] 0.0396224
 ```
 
-Next, the following operations on the `MultiAssayExperiment` object will perform all of the workshop steps between the text "Combine 16S and cytokines data" and "Combine the tables using co-inertia."
+### Results
 
 ```{r}
-pca_list <- momspi_data %>% 
-  # Order both sets by visit number within a subject
-  arrange_colData(subject_id, sample_body_site, visit_number) %>% 
-  # Use metadata to select data collected at
-  # (1) the same visit (across the two experiments)
-  intersect_colData(by = c("subject_id", "sample_body_site",
-                           "project_name", "study_full_name", "subject_gender",
-                           "subject_race", "visit_number")) %>% 
-  # and (2) the first visit
-  filter_colData(visit_number == 1) %>% 
-  # Remove OTUs not observed in any subject
-  trim_empty_rows(phy16S) %>% 
-  # For phy16S data: Convert taxa to proportions
-  # Then, by row -- center (but do not scale) and normalize magnitude
-  transmute(phy16S,
-            cov = (t(counts)/colSums(counts))%>% 
-              t() %>% 
-              prep(., scale = FALSE)) %>% 
-  # For cytokines data: by row -- center, 
-  transmute(cyto,
-            corr = prep(cyto_conc, scale = TRUE)) %>% 
-  assays() %>% 
-  # Ensure that samples are in rows, variables are in columns
-  lapply(., t) %>% 
-  # Perform PCA on both experiments
-  lapply(., function(x) {
-    ade4::dudi.pca(x, scannf = FALSE, nf = 61, 
-                   center = FALSE, scale = FALSE)
-  })
-```
-
-We can see that we obtain the same results as in the workshop when performing the co-inertia analysis (available through `ade4`).
-
-```{r}
-coin <- ade4::coinertia(dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
-                        scannf = FALSE, nf = 2)
-coin$RV
-```
-
-```{r}
-kable(head(coin$co),
+kable(head(coin_hmp$co),
       digits = 5)%>%
-  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
 
 ```{r}
-kable(head(coin$li),
+kable(head(coin_hmp$li),
       digits = 5)%>%
-  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F)
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-### Visualization of output
 
 ```{r, echo=FALSE}
 # PlotCoinVars function from workshop -- modified to include a graph title
@@ -168,11 +209,99 @@ PlotCoinVars <- function(coin, title,
   return(CW_X)
 }
 
-PlotCoinVars(coin, title = "TidyMultitude workflow",
+plot1 <- PlotCoinVars(coin_hmp, title = "HMP Workshop workflow",
+             tab1 = "taxa", tab2 = "cytokines", 
+             Labels1 = NULL,
+             Labels2 = rownames(coin_hmp$li),
+             label = TRUE,PtSize=2,LblSize=3,
+             hjust = 0, vjust = -1.5)
+plot1
+```
+
+## TidyMultitude workflow
+
+First, we will create a function that we can use later in `transmute()`. This function centers (and optionally scales) a transposed matrix then performs the same total-variance normalization used in the HMP workshop.
+
+```{r}
+# Define a preprocessing function
+prep <- function(data, scale = c(TRUE, FALSE)){
+  # Note that the data is transposed so that these steps are performed rowwise
+  scaled <- scale(t(data), center = TRUE, scale = scale) # Center and scale
+  tr <- sum(scaled * scaled)/(dim(scaled)[1]-1) # Fast trace computation
+  processed <- scaled/sqrt(tr) # Normalize magnitude
+  return(t(processed)) # Rotate back
+}
+```
+
+
+
+```{r}
+pca_list <- momspi_data %>% 
+  # Order both sets by visit number within a subject
+  arrange_colData(subject_id, sample_body_site, visit_number) %>% 
+  # Use metadata to select data collected at
+  # (1) the same visit (across the two experiments)
+  intersect_colData(by = c("subject_id", "sample_body_site",
+                           "project_name", "study_full_name", "subject_gender",
+                           "subject_race", "visit_number")) %>% 
+  # and (2) the first visit
+  filter_colData(visit_number == 1) %>% 
+  # Remove OTUs not observed in any subject
+  trim_empty_rows(phy16S) %>% 
+  # For phy16S data: Convert taxa to proportions
+  # Then, by row -- center (but do not scale) and normalize magnitude
+  transmute(phy16S,
+            cov = (t(counts)/colSums(counts))%>% 
+              t() %>% 
+              prep(., scale = FALSE)) %>% 
+  # For cytokines data: by row -- center, 
+  transmute(cyto,
+            corr = prep(cyto_conc, scale = TRUE)) %>% 
+  # Obtain list of assays (as matrices) from the MultiAssayExperiment
+  assays() %>% 
+  # Ensure that samples are in rows, variables are in columns
+  lapply(., t) %>% 
+  # Perform PCA on both experiments
+  lapply(., function(x) {
+    ade4::dudi.pca(x, scannf = FALSE, nf = 61, 
+                   center = FALSE, scale = FALSE)
+  })
+```
+
+We can see that we obtain the same results as in the workshop when performing the co-inertia analysis (available through `ade4`).
+
+```{r}
+coin <- ade4::coinertia(dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
+                        scannf = FALSE, nf = 2)
+coin$RV
+```
+
+### Results
+
+```{r}
+kable(head(coin$co),
+      digits = 5) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+```{r}
+kable(head(coin$li),
+      digits = 5) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+```{r, echo=FALSE}
+plot2 <- PlotCoinVars(coin, title = "TidyMultitude workflow",
              tab1 = "taxa", tab2 = "cytokines", 
              Labels1 = NULL,
              Labels2 = rownames(coin$li),
              label = TRUE,PtSize=2,LblSize=3,
              hjust = 0, vjust = -1.5)
+
+par(mfrow = c(1, 2))
+plot1; plot2
+par(mfrow = c(1, 1))
 ```
 
