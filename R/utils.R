@@ -1,13 +1,4 @@
-#' @title Scaling and Centering of Rows in Matrix-like Objects
-#'
-#' @description Extends `base::scale` to center and/or scale the rows of a
-#'   numeric matrix.
-#'
-#' @param x a numeric matrix(like object), such as an assay.
-#' @param center a logical value indicating whether rows should be centered.
-#' @param scale a logical value indicating whether rows should be scaled.
-#'
-#' @export
+# Extends `base::scale` to center and/or scale the rows of a numeric matrix.
 scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
   
   # Will only center if specified
@@ -23,7 +14,6 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
   return(x)
 }
 
-#' @export
 tidy_colData_helper <- function(.data, FUN, list_of_args) {
   
   # First element of list_of_args will be the word "list" -- replace with
@@ -51,7 +41,33 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
                        rowData = rowData(.data))
 }
 
-#' @export
+tidy_rowData_helper <- function(.data, FUN, list_of_args) {
+  
+  # First element of list_of_args will be the word "list" -- replace with
+  # rowData
+  list_of_args[[1]] <- rowData(.data) %>% 
+    as_tibble() %>% 
+    
+    # Add columns of indices that will be used to subset assay columns
+    # Use a name that is unlikely to appear in colData
+    dplyr::mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
+  
+  # Transform rowData with specified function
+  modded_rowData <- do.call(FUN, args = list_of_args)
+  
+  # Subset columns of assay data by rows of colData
+  modded_assay_list <- purrr::map(.x = as.list(assays(.data)),
+                                  ~ .x[modded_rowData$id_helper_QjWTNFtWmSBc8XS, ])
+  names(modded_assay_list) <- assays(.data) %>% 
+    names()
+  
+  SummarizedExperiment(assays = modded_assay_list, 
+                       # Remove indexing column
+                       rowData = modded_rowData %>% 
+                         dplyr::select(-id_helper_QjWTNFtWmSBc8XS),
+                       colData = colData(.data))
+}
+
 quosure_helper <- function(.data, quosure_list, drop_unused = FALSE) {
   for (i in seq_along(quosure_list)) {
     assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
