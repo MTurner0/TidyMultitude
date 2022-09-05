@@ -14,7 +14,7 @@ mutate <- function(.data, ...) {
 mutate.MultiAssayExperiment <- function(.data, experiment, ...) {
   mutate_quosures <- dplyr:::dplyr_quosures(...)
   experiment_name <- paste0(substitute(experiment))
-  .data[[experiment_name]] <- quosure_helper(.data[[experiment_name]], 
+  .data[[experiment_name]] <- TidyMultitude:::quosure_helper(.data[[experiment_name]], 
                                              mutate_quosures)
   .data
 }
@@ -23,7 +23,7 @@ mutate.MultiAssayExperiment <- function(.data, experiment, ...) {
 #' @export
 mutate.SummarizedExperiment <- function(.data, ...) {
   mutate_quosures <- dplyr:::dplyr_quosures(...)
-  quosure_helper(.data, quosure_list = mutate_quosures)
+  TidyMultitude:::quosure_helper(.data, quosure_list = mutate_quosures)
 }
 
 #' @rdname mutate
@@ -37,7 +37,7 @@ transmute <- function(.data, experiment, ...) {
 transmute.MultiAssayExperiment <- function(.data, experiment, ...) {
   mutate_quosures <- dplyr:::dplyr_quosures(...)
   experiment_name <- paste0(substitute(experiment))
-  .data[[experiment_name]] <- quosure_helper(.data[[experiment_name]], 
+  .data[[experiment_name]] <- TidyMultitude:::quosure_helper(.data[[experiment_name]], 
                                              mutate_quosures,
                                              drop_unused = TRUE)
   .data
@@ -47,5 +47,5 @@ transmute.MultiAssayExperiment <- function(.data, experiment, ...) {
 #' @export
 transmute.SummarizedExperiment <- function(.data, ...) {
   mutate_quosures <- dplyr:::dplyr_quosures(...)
-  quosure_helper(.data, quosure_list = mutate_quosures, drop_unused = TRUE)
+  TidyMultitude:::quosure_helper(.data, quosure_list = mutate_quosures, drop_unused = TRUE)
 }
