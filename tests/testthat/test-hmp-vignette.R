@@ -1,6 +1,8 @@
+library(MultiAssayExperiment)
 library(phyloseq)
 library(magrittr)
-library(testthat)
+library(dplyr)
+library(TidyMultitude)
 
 data("momspiCyto_mtx")
 data("momspiCyto_samp")
@@ -42,10 +44,11 @@ combined_samp <- merge(momspi16S_samp, momspiCyto_samp,
 #select data from first visit only
 combined_samp <- combined_samp[combined_samp$visit_number ==  1,]
 
-table(combined_samp$sample_body_site)#all vaginal samples
-
 #select 16S data for those samples
-combined_16S_phyloseq <- subset_samples(momspi16S_phyloseq, file_name %in% combined_samp$file_name.x)
+combined_16S_phyloseq <- momspi16S_phyloseq
+sample_data(combined_16S_phyloseq) <- momspi16S_samp[momspi16S_samp$file_name %in% combined_samp$file_name.x, ]
+
+# REPLACE combined_16S_phyloseq <- subset_samples(momspi16S_phyloseq, file_name %in% combined_samp$file_name.x)
 
 #get rid of otus that are not observed in any sample for this subset
 combined_16S_phyloseq %<>%
@@ -73,9 +76,10 @@ checkpoint1 <- momspi_data %>%
 checkpoint1_phy16S <- checkpoint1[["phy16S"]]
 checkpoint1_cyto <- checkpoint1[["cyto"]]
 
-expect_equal(apply(checkpoint1_phy16S, 1, mean), apply(target1_phy16S, 1, mean))
-
-expect_equal(apply(checkpoint1_cyto, 1, mean), apply(target1_cyto, 1, mean))
+test_that("HMP Vignette: checkpoint 1", {
+  expect_equal(apply(checkpoint1_phy16S, 1, mean), apply(target1_phy16S, 1, mean))
+  expect_equal(apply(checkpoint1_cyto, 1, mean), apply(target1_cyto, 1, mean))
+})
 
 ## PASSES CHECKPOINT 1
 
@@ -124,20 +128,22 @@ checkpoint2 <- momspi_data %>%
   trim_empty_rows(phy16S) %>% 
   # For phy16S data: Convert taxa to proportions
   # Then, by row -- center (but do not scale) and normalize magnitude
-  transmute(phy16S,
+  TidyMultitude::transmute(phy16S,
             cov = (t(counts)/colSums(counts))%>% 
               t() %>% 
               prep(., scale = FALSE)) %>% 
   # For cytokines data: by row -- center, 
-  transmute(cyto,
+  TidyMultitude::transmute(cyto,
             corr = prep(cyto_conc, scale = TRUE)) %>% 
   assays()
 
 checkpoint2_phy16S <- checkpoint2[["phy16S"]]
 checkpoint2_cyto <- checkpoint2[["cyto"]]
 
-expect_equal(apply(checkpoint2_phy16S, 1, mean), apply(target2_phy16S, 1, mean))
-expect_equal(apply(checkpoint2_cyto, 1, mean), apply(target2_cyto, 1, mean))
+test_that("HMP Vignette: checkpoint 2", {
+  expect_equal(apply(checkpoint2_phy16S, 1, mean), apply(target2_phy16S, 1, mean))
+  expect_equal(apply(checkpoint2_cyto, 1, mean), apply(target2_cyto, 1, mean))
+})
 
 ## PASSES CHECKPOINT 2
 
@@ -158,8 +164,10 @@ checkpoint3 <- checkpoint2 %>%
 checkpoint3_phy16S <- checkpoint3[["phy16S"]]
 checkpoint3_cyto <- checkpoint3[["cyto"]]
 
-expect_equal(checkpoint3_phy16S$eig, target3_phy16S$eig)
-expect_equal(checkpoint3_cyto$eig, target3_cyto$eig)
+test_that("HMP Vignette: checkpoint 3", {
+  expect_equal(checkpoint3_phy16S$eig, target3_phy16S$eig)
+  expect_equal(checkpoint3_cyto$eig, target3_cyto$eig)
+})
 
 ## PASSES CHECKPOINT 3
 
@@ -169,4 +177,6 @@ target_coin <- ade4::coinertia(target3_phy16S, target3_cyto,
 checkpoint_coin <- ade4::coinertia(checkpoint3_phy16S, checkpoint3_cyto,
                                    scannf = FALSE, nf = 2)
 
-expect_equal(target_coin$RV, checkpoint_coin$RV)
+test_that("HMP Vignette: checkpoint 4", {
+  expect_equal(target_coin$RV, checkpoint_coin$RV)
+})
