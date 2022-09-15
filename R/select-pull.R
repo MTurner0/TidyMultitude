@@ -21,9 +21,9 @@ select <- function(.data, ...) {
 select.MultiAssayExperiment <- function(.data, ...) {
   # Convert `...` into a vector of strings of experiment names
   experiment_vector <- rlang::quos(...) %>% 
-    map(rlang::quo_text) %>% 
+    purrr::map(rlang::quo_text) %>% 
     unlist()
-  return(.data[, , experiment_vector]) 
+  return(suppressWarnings(.data[, , experiment_vector]))
 }
 
 #' @title Extract a single `SummarizedExperiment`.
