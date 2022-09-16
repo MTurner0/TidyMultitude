@@ -20,7 +20,7 @@ arrange_colData.MultiAssayExperiment <- function(.data, ...) {
   for(i in seq_along(experiments(.data))) {
     
     # Arrange colData for each SE in the MAE
-    reordered_mae[[i]] <- TidyMultitude:::tidy_colData_helper(.data[[i]], arrange, arrange_args)
+    reordered_mae[[i]] <- TidyMultitude:::tidy_colData_helper(.data[[i]], dplyr::arrange, arrange_args)
   }
   reordered_mae
 }
@@ -29,7 +29,7 @@ arrange_colData.MultiAssayExperiment <- function(.data, ...) {
 #' @export
 arrange_colData.SummarizedExperiment <- function(.data, ...) {
   arrange_args <- as.list(substitute(list(...)))
-  TidyMultitude:::tidy_colData_helper(.data, arrange, arrange_args)
+  TidyMultitude:::tidy_colData_helper(.data, dplyr::arrange, arrange_args)
 }
 
 #' @title Arrange rows of a `MultiAssayExperiment` or `SummarizedExperiment`
@@ -50,7 +50,7 @@ arrange_rowData.MultiAssayExperiment <- function(.data, ...) {
   for(i in seq_along(experiments(.data))) {
     
     # Arrange colData for each SE in the MAE
-    reordered_mae[[i]] <- TidyMultitude:::tidy_rowData_helper(.data[[i]], arrange, arrange_args)
+    reordered_mae[[i]] <- TidyMultitude:::tidy_rowData_helper(.data[[i]], dplyr::arrange, arrange_args)
   }
   reordered_mae
 }
@@ -59,6 +59,5 @@ arrange_rowData.MultiAssayExperiment <- function(.data, ...) {
 #' @export
 arrange_rowData.SummarizedExperiment <- function(.data, ...) {
   arrange_args <- as.list(substitute(list(...)))
-  TidyMultitude:::tidy_rowData_helper(.data, arrange, arrange_args)
+  TidyMultitude:::tidy_rowData_helper(.data, dplyr::arrange, arrange_args)
 }
-

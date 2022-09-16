@@ -1,7 +1,5 @@
-library(MultiAssayExperiment)
 library(phyloseq)
 library(magrittr)
-library(dplyr)
 library(TidyMultitude)
 
 data("momspiCyto_mtx")
@@ -128,12 +126,12 @@ checkpoint2 <- momspi_data %>%
   trim_empty_rows(phy16S) %>% 
   # For phy16S data: Convert taxa to proportions
   # Then, by row -- center (but do not scale) and normalize magnitude
-  TidyMultitude::transmute(phy16S,
+  transmute(phy16S,
             cov = (t(counts)/colSums(counts))%>% 
               t() %>% 
               prep(., scale = FALSE)) %>% 
   # For cytokines data: by row -- center, 
-  TidyMultitude::transmute(cyto,
+  transmute(cyto,
             corr = prep(cyto_conc, scale = TRUE)) %>% 
   assays()
 

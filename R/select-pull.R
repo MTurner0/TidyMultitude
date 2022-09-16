@@ -1,3 +1,7 @@
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Documentation
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 #' @title Subset a `MultiAssayExperiment` by `SummarizedExperiment`s.
 #'
 #' @description Select `SummarizedExperiment`s in a `MultiAssayExperiment`.
@@ -10,21 +14,12 @@
 #'   \itemize{\item `colData`, `rowData`, and `assay`s of selected experiments
 #'   are not affected. \item Output experiments are a subset of input
 #'   experiments, potentially with a different order.}
-#'
-#' @export
-select <- function(.data, ...) {
-  UseMethod("select")
-}
-
+#'   
+#' @seealso \code{\link[dplyr:select]{dplyr::select}}
 #' @rdname select
-#' @export
-select.MultiAssayExperiment <- function(.data, ...) {
-  # Convert `...` into a vector of strings of experiment names
-  experiment_vector <- rlang::quos(...) %>% 
-    purrr::map(rlang::quo_text) %>% 
-    unlist()
-  return(suppressWarnings(.data[, , experiment_vector]))
-}
+#' @name select
+#' 
+NULL
 
 #' @title Extract a single `SummarizedExperiment`.
 #'
@@ -42,12 +37,27 @@ select.MultiAssayExperiment <- function(.data, ...) {
 #'
 #' @return A `SummarizedExperiment`.
 #' 
+#' @seealso \code{\link[dplyr:pull]{dplyr::pull}}
+#' @rdname pull
+#' @name pull
+#' 
+NULL
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Functions
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#' @importFrom dplyr select
 #' @export
-pull <- function(.data, var = -1) {
-  UseMethod("pull")
+select.MultiAssayExperiment <- function(.data, ...) {
+  # Convert `...` into a vector of strings of experiment names
+  experiment_vector <- rlang::quos(...) %>% 
+    purrr::map(rlang::quo_text) %>% 
+    unlist()
+  return(suppressWarnings(.data[, , experiment_vector]))
 }
 
-#' @rdname pull
+#' @importFrom dplyr pull
 #' @export
 pull.MultiAssayExperiment <- function(.data, var = -1) {
   if(is.numeric(var) & var < 0) {
@@ -57,3 +67,9 @@ pull.MultiAssayExperiment <- function(.data, var = -1) {
   }
   return(.data[[var]])
 }
+
+#' @export
+dplyr::select
+
+#' @export
+dplyr::pull

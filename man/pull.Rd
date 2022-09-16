@@ -2,13 +2,7 @@
 % Please edit documentation in R/select-pull.R
 \name{pull}
 \alias{pull}
-\alias{pull.MultiAssayExperiment}
 \title{Extract a single \code{SummarizedExperiment}.}
-\usage{
-pull(.data, var = -1)
-
-\method{pull}{MultiAssayExperiment}(.data, var = -1)
-}
 \arguments{
 \item{.data}{A \code{MultiAssayExperiment} containing at least one
 \code{SummarizedExperiment}.}
@@ -26,4 +20,7 @@ A \code{SummarizedExperiment}.
 }
 \description{
 \code{pull()} is similar to \verb{[[]]}.
+}
+\seealso{
+\code{\link[dplyr:pull]{dplyr::pull}}
 }
