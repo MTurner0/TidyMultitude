@@ -17,21 +17,23 @@ filter_colData <- function(.data, ...) {
 }
 
 #' @rdname filter_colData
+#' @importFrom dplyr filter
 #' @export
 filter_colData.MultiAssayExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
   filtered_mae <- .data
   for(i in seq_along(experiments(.data))) {
-    filtered_mae[[i]] <- TidyMultitude:::tidy_colData_helper(.data[[i]], filter, filter_args)
+    filtered_mae[[i]] <- tidy_colData_helper(.data[[i]], filter, filter_args)
   }
   filtered_mae
 }
 
 #' @rdname filter_colData
+#' @importFrom dplyr filter
 #' @export
 filter_colData.SummarizedExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
-  TidyMultitude:::tidy_colData_helper(.data, filter, filter_args)
+  tidy_colData_helper(.data, filter, filter_args)
 }
 
 #' @title Subset columns of `SummarizedExperiment`s by rows of `rowData`.
@@ -49,19 +51,21 @@ filter_rowData <- function(.data, ...) {
 }
 
 #' @rdname filter_rowData
+#' @importFrom dplyr filter
 #' @export
 filter_rowData.MultiAssayExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
   filtered_mae <- .data
   for(i in seq_along(experiments(.data))) {
-    filtered_mae[[i]] <- TidyMultitude:::tidy_rowData_helper(.data[[i]], filter, filter_args)
+    filtered_mae[[i]] <- tidy_rowData_helper(.data[[i]], filter, filter_args)
   }
   filtered_mae
 }
 
 #' @rdname filter_rowData
+#' @importFrom dplyr filter
 #' @export
 filter_rowData.SummarizedExperiment <- function(.data, ...) {
   filter_args <- as.list(substitute(list(...)))
-  TidyMultitude:::tidy_rowData_helper(.data, filter, filter_args)
+  tidy_rowData_helper(.data, filter, filter_args)
 }

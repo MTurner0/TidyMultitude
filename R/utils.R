@@ -19,11 +19,11 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
   # First element of list_of_args will be the word "list" -- replace with
   # colData
   list_of_args[[1]] <- colData(.data) %>% 
-    as_tibble() %>% 
+    dplyr::as_tibble() %>% 
     
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
-    dplyr::mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
+    mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
   
   # Transform colData with specified function
   modded_colData <- do.call(FUN, args = list_of_args)
@@ -37,7 +37,7 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
   SummarizedExperiment(assays = modded_assay_list, 
                        # Remove indexing column
                        colData = modded_colData %>% 
-                         dplyr::select(-id_helper_QjWTNFtWmSBc8XS),
+                         select(-id_helper_QjWTNFtWmSBc8XS),
                        rowData = rowData(.data))
 }
 
@@ -46,14 +46,14 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
   # First element of list_of_args will be the word "list" -- replace with
   # rowData
   list_of_args[[1]] <- rowData(.data) %>% 
-    as_tibble() %>% 
+    dplyr::as_tibble() %>% 
     
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
-    dplyr::mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
-  
+    mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
+    
   # Transform rowData with specified function
-  modded_rowData <- do.call(FUN, args = list_of_args)
+  modded_rowData <- do.call(dplyr::FUN, args = list_of_args)
   
   # Subset columns of assay data by rows of colData
   modded_assay_list <- purrr::map(.x = as.list(assays(.data)),
@@ -70,6 +70,10 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
 
 quosure_helper <- function(.data, quosure_list, drop_unused = FALSE) {
   for (i in seq_along(quosure_list)) {
+    #TEST ME
+    if(names(quosure_list)[i] == "") {
+      
+    }
     assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
                                                          data = assays(.data) %>% 
                                                            as.list())
@@ -111,16 +115,16 @@ intersect_colData <- function(.data, experiment1, experiment2, by) {
   }
   
   mutated_colData1 <- colData(.data[[exp1_name]]) %>% 
-    as_tibble() %>% 
-    dplyr::mutate(id_helper_mrujhmAqKlLj9cJ = 1:n())
+    dplyr::as_tibble() %>% 
+    mutate(id_helper_mrujhmAqKlLj9cJ = 1:nrow(.))
   
   mutated_colData2 <- colData(.data[[exp2_name]]) %>% 
-    as_tibble() %>% 
-    dplyr::mutate(id_helper_QFSIxvNAMbN8ltI = 1:n())
+    dplyr::as_tibble() %>% 
+    mutate(id_helper_QFSIxvNAMbN8ltI = 1:nrow(.))
   
   # Make new experiment 1
   exp1_indices <- merge(mutated_colData1, mutated_colData2, by = by) %>% 
-    dplyr::select(id_helper_mrujhmAqKlLj9cJ) %>% dplyr::pull()
+    select(id_helper_mrujhmAqKlLj9cJ) %>% pull()
   
   exp1_assays <- purrr::map(.x = as.list(assays(.data[[exp1_name]])),
                             ~ .x[, exp1_indices])
@@ -133,7 +137,7 @@ intersect_colData <- function(.data, experiment1, experiment2, by) {
   
   # Make new experiment 2
   exp2_indices <- merge(mutated_colData1, mutated_colData2, by = by) %>% 
-    dplyr::select(id_helper_QFSIxvNAMbN8ltI) %>% dplyr::pull()
+    select(id_helper_QFSIxvNAMbN8ltI) %>% pull()
   
   exp2_assays <- purrr::map(.x = as.list(assays(.data[[exp2_name]])),
                             ~ .x[, exp2_indices])
@@ -150,3 +154,4 @@ intersect_colData <- function(.data, experiment1, experiment2, by) {
   
   MultiAssayExperiment(experiments = exp_list)
 }
+

@@ -2,13 +2,7 @@
 % Please edit documentation in R/select-pull.R
 \name{select}
 \alias{select}
-\alias{select.MultiAssayExperiment}
 \title{Subset a \code{MultiAssayExperiment} by \code{SummarizedExperiment}s.}
-\usage{
-select(.data, ...)
-
-\method{select}{MultiAssayExperiment}(.data, ...)
-}
 \arguments{
 \item{.data}{A \code{MultiAssayExperiment}.}
 
@@ -23,4 +17,7 @@ experiments, potentially with a different order.}
 }
 \description{
 Select \code{SummarizedExperiment}s in a \code{MultiAssayExperiment}.
+}
+\seealso{
+\code{\link[dplyr:select]{dplyr::select}}
 }

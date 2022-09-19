@@ -79,3 +79,12 @@ mutate_step1 <- function(experiment, ...) {
   assays(experiment)[[new_name]] <- assays(experiment)[[indexer]] %>% FUN()
   return(experiment)
 }
+
+my_quosure_test <- function(.data, ...) {
+  res <- dplyr:::dplyr_quosures(...)
+  inner_quosure_test(.data, res)
+}
+
+inner_quosure_test <- function(.data, args) {
+  rlang::eval_tidy(args, data = .data)
+}
