@@ -70,6 +70,10 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
 
 quosure_helper <- function(.data, quosure_list, drop_unused = FALSE) {
   for (i in seq_along(quosure_list)) {
+    #TEST ME
+    if(names(quosure_list)[i] == "") {
+      
+    }
     assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
                                                          data = assays(.data) %>% 
                                                            as.list())
