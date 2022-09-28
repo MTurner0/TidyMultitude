@@ -2,7 +2,7 @@
 % Please edit documentation in R/mutate-transmute.R
 \name{mutate}
 \alias{mutate}
-\title{Create, modify, and delete assays}
+\title{Create, modify, and delete assays or \code{SummarizedExperiments}}
 \description{
 \code{mutate()} adds new assays and preserves existing ones.
 \code{transmute()} adds new assays and drops existing ones. New assays overwrite
