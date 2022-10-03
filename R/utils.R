@@ -14,6 +14,10 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
   return(x)
 }
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Helpers for colData and rowData operations
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 tidy_colData_helper <- function(.data, FUN, list_of_args) {
   
   # First element of list_of_args will be the word "list" -- replace with
@@ -68,22 +72,44 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
                        colData = colData(.data))
 }
 
-quosure_helper <- function(.data, quosure_list, drop_unused = FALSE) {
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Helper for mutate/transmute
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+quosure_helper <- function(.data, quosure_list, .keep = "all") {
+  UseMethod("quosure_helper")
+}
+
+quosure_helper.MultiAssayExperiment <- function(.data, quosure_list, .keep = "all") {
+  exp_list <- experiments(.data)
   for (i in seq_along(quosure_list)) {
-    #TEST ME
-    if(names(quosure_list)[i] == "") {
-      
-    }
-    assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
-                                                         data = assays(.data) %>% 
-                                                           as.list())
+    exp_list[[names(quosure_list)[i]]] <- rlang::eval_tidy(
+      quosure_list[[i]], data = exp_list %>% as.list()
+      )
   }
   # Provides the transmute functionality
-  if (drop_unused) {
+  if (.keep == "none") {
+    exp_list <- exp_list[names(quosure_list)]
+  }
+  MultiAssayExperiment(experiments = exp_list)
+}
+
+quosure_helper.SummarizedExperiment <- function(.data, quosure_list, .keep = "all") {
+  for (i in seq_along(quosure_list)) {
+    assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(
+      quosure_list[[i]], data = assays(.data) %>% as.list()
+      )
+  }
+  # Provides the transmute functionality
+  if (.keep == "none") {
     assays(.data) <- assays(.data)[names(quosure_list)]
   }
   .data
 }
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Beefs up MAE::intersectColumns()
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' @title Keep biological units based on matching factors in `colData`
 #'

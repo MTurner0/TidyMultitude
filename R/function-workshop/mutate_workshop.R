@@ -88,3 +88,64 @@ my_quosure_test <- function(.data, ...) {
 inner_quosure_test <- function(.data, args) {
   rlang::eval_tidy(args, data = .data)
 }
+
+
+
+
+
+
+
+# Needs to check whether `experiment`
+
+bully <- function(.data, experiment, ...) {
+  mutate_quosures <- dplyr:::dplyr_quosures(...)
+  
+  # Operate on SEs within MAE
+  if (missing(experiment)) {
+    print(mutate_quosures)
+    .data <- dummy(.data, mutate_quosures)
+    return(.data)
+  }
+
+  # Operate on assays within SE
+  else {
+    print(mutate_quosures)
+    experiment_name <- paste0(substitute(experiment))
+    .data[[experiment_name]] <- dummy(.data[[experiment_name]], 
+                                      mutate_quosures)
+    return(.data) 
+  }
+}
+
+dummy <- function(.data, quosure_list, drop_unused = FALSE) {
+  UseMethod("dummy")
+}
+
+dummy.MultiAssayExperiment <- function(.data, quosure_list, drop_unused = FALSE) {
+  experiment_list <- experiments(.data)
+  for (i in seq_along(quosure_list)) {
+    experiment_list[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
+                                                                data = experiment_list %>% 
+                                                                  as.list())
+  }
+  # Provides the transmute functionality
+  if (drop_unused) {
+    experiment_list <- experiment_list[names(quosure_list)]
+  }
+  MultiAssayExperiment(experiments = experiment_list)
+}
+
+dummy.SummarizedExperiment <- function(.data, quosure_list, drop_unused = FALSE) {
+  for (i in seq_along(quosure_list)) {
+    assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(quosure_list[[i]],
+                                                                data = assays(.data) %>% 
+                                                                  as.list())
+  }
+  # Provides the transmute functionality
+  if (drop_unused) {
+    assays(.data) <- assays(.data)[names(quosure_list)]
+  }
+  .data
+}
+
+
