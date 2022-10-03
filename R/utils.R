@@ -89,7 +89,7 @@ quosure_helper.MultiAssayExperiment <- function(.data, quosure_list, .keep = "al
   }
   # Provides the transmute functionality
   if (.keep == "none") {
-    exp_list <- experiment_list[names(quosure_list)]
+    exp_list <- exp_list[names(quosure_list)]
   }
   MultiAssayExperiment(experiments = exp_list)
 }
