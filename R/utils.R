@@ -18,6 +18,8 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
 # Helpers for colData and rowData operations
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+#' @importFrom SummarizedExperiment colData
+#' @importFrom SummarizedExperiment rowData
 tidy_colData_helper <- function(.data, FUN, list_of_args) {
   
   # First element of list_of_args will be the word "list" -- replace with
@@ -34,7 +36,7 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
   
   # Subset columns of assay data by rows of colData
   modded_assay_list <- purrr::map(.x = as.list(assays(.data)),
-                               ~ .x[, modded_colData$id_helper_QjWTNFtWmSBc8XS])
+                                  ~ .x[, modded_colData$id_helper_QjWTNFtWmSBc8XS])
   names(modded_assay_list) <- assays(.data) %>% 
     names()
   
@@ -45,6 +47,8 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
                        rowData = rowData(.data))
 }
 
+#' @importFrom SummarizedExperiment colData
+#' @importFrom SummarizedExperiment rowData
 tidy_rowData_helper <- function(.data, FUN, list_of_args) {
   
   # First element of list_of_args will be the word "list" -- replace with
@@ -55,7 +59,7 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
     mutate(id_helper_QjWTNFtWmSBc8XS = 1:nrow(.))
-    
+  
   # Transform rowData with specified function
   modded_rowData <- do.call(dplyr::FUN, args = list_of_args)
   
@@ -72,6 +76,17 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
                        colData = colData(.data))
 }
 
+# Checks whether a SummarizedExperiment has colData
+#' @importFrom SummarizedExperiment colData
+has_colData <- function(.data) {
+  !(0 %in% (.data %>% colData() %>% dim()))
+}
+
+# Checks whether all Experiments in an MAE have local colData
+has_local_colData <- function(.data) {
+  suppressWarnings(all(lapply(experiments(.data), has_colData)))
+}
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Helper for mutate/transmute
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,7 +100,7 @@ quosure_helper.MultiAssayExperiment <- function(.data, quosure_list, .keep = "al
   for (i in seq_along(quosure_list)) {
     exp_list[[names(quosure_list)[i]]] <- rlang::eval_tidy(
       quosure_list[[i]], data = exp_list %>% as.list()
-      )
+    )
   }
   # Provides the transmute functionality
   if (.keep == "none") {
@@ -98,86 +113,12 @@ quosure_helper.SummarizedExperiment <- function(.data, quosure_list, .keep = "al
   for (i in seq_along(quosure_list)) {
     assays(.data)[[names(quosure_list)[i]]] <- rlang::eval_tidy(
       quosure_list[[i]], data = assays(.data) %>% as.list()
-      )
+    )
   }
   # Provides the transmute functionality
   if (.keep == "none") {
     assays(.data) <- assays(.data)[names(quosure_list)]
   }
   .data
-}
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Beefs up MAE::intersectColumns()
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-#' @title Keep biological units based on matching factors in `colData`
-#'
-#' @description `MultiAssayExperiment::intersectColumns()` only works if the
-#'   experiments have the same IDs within the `sampleMap`. This function will
-#'   use `colData` features to match biological units (currently only supports
-#'   two experiments).
-#'
-#' @param .data A MultiAssayExperiment object.
-#'
-#' @param experiment1 A SummarizedExperiment within `.data`.
-#'
-#' @param experiment2 Another SummarizedExperiment within `.data`.
-#'
-#' @param by A vector of `colData` features (i.e. column names) to match units
-#'   by.
-#'
-#' @export
-intersect_colData <- function(.data, experiment1, experiment2, by) {
-  
-  # If the experiments are not specified, use the first two experiments by
-  # default
-  if (missing(experiment1) & missing(experiment2)) {
-    exp1_name <- names(.data)[1]
-    exp2_name <- names(.data)[2]
-  } else {
-    exp1_name <- paste0(substitute(experiment1))
-    exp2_name <- paste0(substitute(experiment2))
-  }
-  
-  mutated_colData1 <- colData(.data[[exp1_name]]) %>% 
-    dplyr::as_tibble() %>% 
-    mutate(id_helper_mrujhmAqKlLj9cJ = 1:nrow(.))
-  
-  mutated_colData2 <- colData(.data[[exp2_name]]) %>% 
-    dplyr::as_tibble() %>% 
-    mutate(id_helper_QFSIxvNAMbN8ltI = 1:nrow(.))
-  
-  # Make new experiment 1
-  exp1_indices <- merge(mutated_colData1, mutated_colData2, by = by) %>% 
-    select(id_helper_mrujhmAqKlLj9cJ) %>% pull()
-  
-  exp1_assays <- purrr::map(.x = as.list(assays(.data[[exp1_name]])),
-                            ~ .x[, exp1_indices])
-  names(exp1_assays) <- assays(.data[[exp1_name]]) %>% 
-    names()
-  
-  new_exp1 <- SummarizedExperiment(assays = exp1_assays,
-                                   colData = colData(.data[[exp1_name]])[exp1_indices, ],
-                                   rowData = rowData(.data[[exp1_name]]))
-  
-  # Make new experiment 2
-  exp2_indices <- merge(mutated_colData1, mutated_colData2, by = by) %>% 
-    select(id_helper_QFSIxvNAMbN8ltI) %>% pull()
-  
-  exp2_assays <- purrr::map(.x = as.list(assays(.data[[exp2_name]])),
-                            ~ .x[, exp2_indices])
-  names(exp2_assays) <- assays(.data[[exp2_name]]) %>% 
-    names()
-  
-  new_exp2 <- SummarizedExperiment(assays = exp2_assays,
-                                   colData = colData(.data[[exp2_name]])[exp2_indices, ],
-                                   rowData = rowData(.data[[exp2_name]]))
-  
-  # Build MAE
-  exp_list <- list(new_exp1, new_exp2)
-  names(exp_list) <- c(exp1_name, exp2_name)
-  
-  MultiAssayExperiment(experiments = exp_list)
 }
 
