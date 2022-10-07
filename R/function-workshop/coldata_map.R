@@ -1,5 +1,4 @@
 library(dplyr)
-library(MultiAssayExperiment)
 library(TidyMultitude)
 
 exp <- curatedTCGAData::curatedTCGAData(

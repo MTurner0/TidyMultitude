@@ -27,20 +27,20 @@ NULL
 #'
 #' @param .data A `MultiAssayExperiment` containing at least one
 #'   `SummarizedExperiment`.
-#' @param  var A variable specified as: \itemize{ \item a positive integer,
-#'   giving the position of the experiment counting from the top; \item a
-#'   negative integer, giving the position of the experiment counting from the
-#'   bottom. } 
-#'   The default returns the last experiment. If there is only one experiment
-#'   (e.g. if \code{\link{select}} has been used to select a single experiment
-#'   from the `MultiAssayExperiment`), then this will be chosen.
+#' @param  var A variable specified as: \itemize{ \item a literal experiment
+#'   name; \item a positive integer, giving the position of the experiment
+#'   counting from the top; \item a negative integer, giving the position of the
+#'   experiment counting from the bottom. } The default returns the last
+#'   experiment. If there is only one experiment (e.g. if \code{\link{select}}
+#'   has been used to select a single experiment from the
+#'   `MultiAssayExperiment`), then this will be chosen.
 #'
 #' @return A `SummarizedExperiment`.
-#' 
+#'
 #' @seealso \code{\link[dplyr:pull]{dplyr::pull}}
 #' @rdname pull
 #' @name pull
-#' 
+#'   
 NULL
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,6 +60,10 @@ select.MultiAssayExperiment <- function(.data, ...) {
 #' @importFrom dplyr pull
 #' @export
 pull.MultiAssayExperiment <- function(.data, var = -1) {
+  name <- substitute(var)
+  if(is.symbol(name)) {
+    var <- paste0(name)
+  }
   if(is.numeric(var) & var < 0) {
     
     # Convert negative index to positive index

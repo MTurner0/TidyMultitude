@@ -7,13 +7,13 @@
 \item{.data}{A \code{MultiAssayExperiment} containing at least one
 \code{SummarizedExperiment}.}
 
-\item{var}{A variable specified as: \itemize{ \item a positive integer,
-giving the position of the experiment counting from the top; \item a
-negative integer, giving the position of the experiment counting from the
-bottom. }
-The default returns the last experiment. If there is only one experiment
-(e.g. if \code{\link{select}} has been used to select a single experiment
-from the \code{MultiAssayExperiment}), then this will be chosen.}
+\item{var}{A variable specified as: \itemize{ \item a literal experiment
+name; \item a positive integer, giving the position of the experiment
+counting from the top; \item a negative integer, giving the position of the
+experiment counting from the bottom. } The default returns the last
+experiment. If there is only one experiment (e.g. if \code{\link{select}}
+has been used to select a single experiment from the
+\code{MultiAssayExperiment}), then this will be chosen.}
 }
 \value{
 A \code{SummarizedExperiment}.
