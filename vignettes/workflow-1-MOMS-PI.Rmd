@@ -32,7 +32,7 @@ First, we will walk through the steps of the workflow used in the HMP workshop. 
 
 ## Setup
 
-Both workflows will use data from the HMP2Data
+Both workflows will use data from the [`HMP2Data package`](https://bioconductor.org/packages/release/data/experiment/html/HMP2Data.html).
 
 ```{r}
 # Load 16S rRNA data

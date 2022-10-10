@@ -1,5 +1,3 @@
-library(MultiAssayExperiment)
-
 test_that("Pull yoinks an experiment", {
   data("mae")
   expect_s4_class(pull(mae), "SummarizedExperiment")

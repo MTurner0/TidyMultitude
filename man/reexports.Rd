@@ -8,7 +8,10 @@
 \alias{transmute}
 \alias{\%>\%}
 \alias{MultiAssayExperiment}
+\alias{experiments}
 \alias{SummarizedExperiment}
+\alias{assays}
+\alias{assays<-}
 \alias{select}
 \alias{pull}
 \title{Objects exported from other packages}
@@ -20,8 +23,8 @@ below to see their documentation.
 \describe{
   \item{dplyr}{\code{\link[dplyr:reexports]{\%>\%}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{pull}}, \code{\link[dplyr]{select}}, \code{\link[dplyr:mutate]{transmute}}}
 
-  \item{MultiAssayExperiment}{\code{\link[MultiAssayExperiment]{MultiAssayExperiment}}}
+  \item{MultiAssayExperiment}{\code{\link[MultiAssayExperiment:MultiAssayExperiment-methods]{experiments}}, \code{\link[MultiAssayExperiment]{MultiAssayExperiment}}}
 
-  \item{SummarizedExperiment}{\code{\link[SummarizedExperiment:RangedSummarizedExperiment-class]{SummarizedExperiment}}}
+  \item{SummarizedExperiment}{\code{\link[SummarizedExperiment:SummarizedExperiment-class]{assays}}, \code{\link[SummarizedExperiment:SummarizedExperiment-class]{assays<-}}, \code{\link[SummarizedExperiment:RangedSummarizedExperiment-class]{SummarizedExperiment}}}
 }}
 

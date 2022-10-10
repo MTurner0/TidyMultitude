@@ -1,6 +1,5 @@
 library(phyloseq)
 library(magrittr)
-library(TidyMultitude)
 
 data("momspiCyto_mtx")
 data("momspiCyto_samp")
