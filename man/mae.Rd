@@ -11,14 +11,17 @@ An object of class \code{MultiAssayExperiment} of length 2.
 mae
 }
 \description{
-26 patients were randomly assigned to a \code{treatment} or \code{placebo}.
+26 patients were randomly assigned to a \code{treatment} or
+\code{placebo}.
 
-On each of 5 visits, stool samples were obtained for 16S rRNA-seq (of 10 bacterial species).
-However, 5 of the sequencing results failed quality control and had to be discarded.
-The results are stored in the \code{counts} assay in the \code{phy16S} \code{SummarizedExperiment}.
+On each of 5 visits, stool samples were obtained for 16S rRNA-seq (of 10
+bacterial species). However, 5 of the sequencing results failed quality
+control and had to be discarded. The results are stored in the \code{counts}
+assay in the \code{phy16S} \code{SummarizedExperiment}.
 
 On visits 1, 3, and 5, the concentrations of 8 cytokines were measured.
-These results are stored in the \code{cyto_conc} assay in the \code{cyto} \code{SummarizedExperiment}.
+These results are stored in the \code{cyto_conc} assay in the \code{cyto}
+\code{SummarizedExperiment}.
 }
 \examples{
 print(mae)

@@ -28,7 +28,8 @@ library(TidyMultitude)
 
 This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`.
 
-First, we will walk through the steps of the workflow used in the HMP workshop. Then, we will demonstrate how these steps can be simplified using `TidyMultitude`.
+First, we will walk through the steps of the workflow used in the HMP workshop. 
+Then, we will demonstrate how these steps can be simplified using `TidyMultitude`.
 
 ## Setup
 
@@ -53,32 +54,40 @@ The 16S rRNA data can be contained in a `phyloseq` object.
 
 ```{r}
 # Construct phyloseq object
-momspi16S_phyloseq <- phyloseq(otu_table(momspi16S_mtx, taxa_are_rows = TRUE),
-                               sample_data(momspi16S_samp),
-                               tax_table(momspi16S_tax))
+momspi16S_phyloseq <- phyloseq(
+  otu_table(momspi16S_mtx, taxa_are_rows = TRUE),
+  sample_data(momspi16S_samp),
+  tax_table(momspi16S_tax)
+  )
+
 momspi16S_phyloseq
 ```
 
 
 ### Objects for TidyMultitude workflow
 
-For the TidyMultitude workflow, we will need a `MultiAssayExperiment` object containing `SummarizedExperiment` objects representing the cytokine and 16S rRNA data, respectively. `MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we must make a `SummarizedExperiment` for our 16S rRNA data.
+For the TidyMultitude workflow, we will need a `MultiAssayExperiment` object containing `SummarizedExperiment` objects representing the cytokine and 16S rRNA data, respectively.
+`MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we must make a `SummarizedExperiment` for our 16S rRNA data.
 
 ```{r}
 # Construct cytokines SummarizedExperiment
-momspiCyto <- SummarizedExperiment(assays = list(cyto_conc = momspiCyto_mtx),
-                                   colData = momspiCyto_samp,
-                                   rowData = data.frame(cytokine = 
-                                                        rownames(momspiCyto_mtx)))
+momspiCyto <- SummarizedExperiment(
+  assays = list(cyto_conc = momspiCyto_mtx),
+  colData = momspiCyto_samp,
+  rowData = data.frame(cytokine = rownames(momspiCyto_mtx))
+  )
 
 # Construct 16S SummarizedExperiment
-momspi16S <- SummarizedExperiment(assays = list(counts = momspi16S_mtx),
-                                  colData = momspi16S_samp,
-                                  rowData = momspi16S_tax)
+momspi16S <- SummarizedExperiment(
+  assays = list(counts = momspi16S_mtx),
+  colData = momspi16S_samp,
+  rowData = momspi16S_tax
+  )
 
 # Construct MultiAssayExperiment
-momspi_data <- MultiAssayExperiment(experiments = list(phy16S = momspi16S,
-                                                       cyto = momspiCyto))
+momspi_data <- MultiAssayExperiment(
+  experiments = list(phy16S = momspi16S, cyto = momspiCyto)
+  )
 
 momspi_data
 ```
@@ -136,16 +145,20 @@ cyto_mtx <- scale(combined_Cyto_mtx, center = TRUE, scale = TRUE)
 # Normalize magnitude and perform PCA
 taxa_tr <- sum(taxa_mtx*taxa_mtx)/(dim(taxa_mtx)[1]-1)
 taxa_mtx <- taxa_mtx/sqrt(taxa_tr)
-taxa.pca <- ade4::dudi.pca(taxa_mtx, scannf=FALSE, nf =61,
-                     center = FALSE, scale = FALSE)
+taxa.pca <- ade4::dudi.pca(
+  taxa_mtx, scannf = FALSE, nf = 61, center = FALSE, scale = FALSE
+  )
 
 cyto_tr <- sum(cyto_mtx*cyto_mtx)/(dim(cyto_mtx)[1]-1)
 cyto_mtx <- cyto_mtx/sqrt(cyto_tr)
-cyto.pca <- ade4::dudi.pca(cyto_mtx, scannf=FALSE, nf =61,
-                     center = FALSE, scale = FALSE)
+cyto.pca <- ade4::dudi.pca(
+  cyto_mtx, scannf = FALSE, nf = 61, center = FALSE, scale = FALSE
+  )
 
 # Co-inertia is available through R package ade4; it takes ade4 PCA objects and performs joint eigendecomposition.
-coin_hmp <- ade4::coinertia(taxa.pca, cyto.pca, scannf = FALSE, nf = 2)
+coin_hmp <- ade4::coinertia(
+  taxa.pca, cyto.pca, scannf = FALSE, nf = 2
+  )
 
 # RV coefficient – measure of similarity between 16S and cytokines tables
 coin_hmp$RV
@@ -170,37 +183,38 @@ kable(head(coin_hmp$li),
 
 ```{r, echo=FALSE}
 # PlotCoinVars function from workshop -- modified to include a graph title
-PlotCoinVars <- function(coin, title,
-                         tab1 = "Table1", tab2 = "Table2", 
-                         Labels1 = NULL, Labels2 = NULL, label = TRUE,
-                         hjust = 0, vjust = -1.5, PtSize = 2, LblSize = 2){
+PlotCoinVars <- function(
+    coin, title, tab1 = "Table1", tab2 = "Table2",
+    Labels1 = NULL, Labels2 = NULL, label = TRUE,
+    hjust = 0, vjust = -1.5, PtSize = 2, LblSize = 2
+    ){
 
   if(is.null(Labels1)){Labels1 <- 1:nrow(coin$co)} #tab1 labels
   if(is.null(Labels2)){Labels2 <- 1:nrow(coin$li)} #tab2 labels
-  
+
   #extract scores for each table
   x = colnames(coin$co)[1]
   y = colnames(coin$co)[2]
-  
+
   #first table data
   df1 <- data.frame(coin$co$Comp1, coin$co$Comp2, Labels1, rep(tab1, nrow(coin$co)))
   rownames(df1) <- rownames(coin$co)
   names(df1) <- c(x,y,  "Labels", "Table")
-  
+
   #second table data
   df2 <- data.frame(coin$li$Axis1, coin$li$Axis2, Labels2, rep(tab2, nrow(coin$li)))
   rownames(df2) <- rownames(coin$li)
   names(df2) <- c(x,y, "Labels", "Table")
-  
+
   #conbine two tables for plotting
   df <- rbind(df1, df2)
   ord_map = aes_string(x = x, y = y, color = "Table", shape = "Table")
-  
+
   CW_X <- ggplot(df, ord_map) + geom_point( size = PtSize) + 
           scale_color_manual(values = c("red", "blue")) + theme_bw() +
           labs(title = title, x = "", y = "") + 
           theme(legend.title=element_blank())
-  
+
   if(label == TRUE) { 
       #Last thing: Fix order of labels
       lbl_map = aes_string(x = x, y = y, label = "Labels")  
@@ -209,12 +223,12 @@ PlotCoinVars <- function(coin, title,
   return(CW_X)
 }
 
-plot1 <- PlotCoinVars(coin_hmp, title = "HMP Workshop workflow",
-             tab1 = "taxa", tab2 = "cytokines", 
-             Labels1 = NULL,
-             Labels2 = rownames(coin_hmp$li),
-             label = TRUE,PtSize=2,LblSize=3,
-             hjust = 0, vjust = -1.5)
+plot1 <- PlotCoinVars(
+  coin_hmp, title = "HMP Workshop workflow", tab1 = "taxa", tab2 = "cytokines",
+  Labels1 = NULL, Labels2 = rownames(coin_hmp$li), label = TRUE,
+  PtSize = 2,LblSize = 3, hjust = 0, vjust = -1.5
+  )
+
 plot1
 ```
 
@@ -236,43 +250,51 @@ prep <- function(data, scale = c(TRUE, FALSE)){
 
 
 ```{r}
-pca_list <- momspi_data %>% 
+pca_list <- momspi_data %>%
   # Order both sets by visit number within a subject
-  arrange_colData(subject_id, sample_body_site, visit_number) %>% 
+  arrange_colData(subject_id, sample_body_site, visit_number) %>%
   # Use metadata to select data collected at
   # (1) the same visit (across the two experiments)
   intersect_colData(by = c("subject_id", "sample_body_site",
                            "project_name", "study_full_name", "subject_gender",
-                           "subject_race", "visit_number")) %>% 
+                           "subject_race", "visit_number")) %>%
   # and (2) the first visit
-  filter_colData(visit_number == 1) %>% 
+  filter_colData(visit_number == 1) %>%
   # Remove OTUs not observed in any subject
-  trim_empty_rows(phy16S) %>% 
+  trim_empty_rows(phy16S) %>%
   # For phy16S data: Convert taxa to proportions
   # Then, by row -- center (but do not scale) and normalize magnitude
-  transmute(phy16S,
-            cov = (t(counts)/colSums(counts))%>% 
-              t() %>% 
-              prep(., scale = FALSE)) %>% 
+  transmute(
+    phy16S,
+    cov = (t(counts)/colSums(counts))%>%
+      t() %>%
+      prep(., scale = FALSE)
+    ) %>%
   # For cytokines data: by row -- center, 
-  transmute(cyto,
-            corr = prep(cyto_conc, scale = TRUE)) %>% 
+  transmute(
+    cyto,
+    corr = prep(cyto_conc, scale = TRUE)
+    ) %>% 
   # Obtain list of assays (as matrices) from the MultiAssayExperiment
-  assays() %>% 
+  assays() %>%
   # Ensure that samples are in rows, variables are in columns
-  lapply(., t) %>% 
+  lapply(., t) %>%
   # Perform PCA on both experiments
   lapply(., function(x) {
-    ade4::dudi.pca(x, scannf = FALSE, nf = 61, 
-                   center = FALSE, scale = FALSE)
+    ade4::dudi.pca(
+      x, scannf = FALSE, nf = 61, center = FALSE, scale = FALSE
+      )
   })
 ```
 
 We can see that we obtain the same results as in the workshop when performing the co-inertia analysis (available through `ade4`).
 
 ```{r}
-coin <- ade4::coinertia(dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
-                        scannf = FALSE, nf = 2)
+coin <- ade4::coinertia(
+  dudiX = pca_list[["phy16S"]], dudiY = pca_list[["cyto"]], 
+  scannf = FALSE, nf = 2
+  )
+
 coin$RV
 ```
 
@@ -294,7 +316,7 @@ kable(head(coin$li),
 
 ```{r, echo=FALSE}
 plot2 <- PlotCoinVars(coin, title = "TidyMultitude workflow",
-             tab1 = "taxa", tab2 = "cytokines", 
+             tab1 = "taxa", tab2 = "cytokines",
              Labels1 = NULL,
              Labels2 = rownames(coin$li),
              label = TRUE,PtSize=2,LblSize=3,
