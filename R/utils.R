@@ -20,7 +20,9 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
 # Helpers for colData and rowData operations
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+#' @importFrom dplyr as_tibble
 #' @importFrom dplyr n
+#' @importFrom purrr map
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment rowData
 tidy_colData_helper <- function(.data, FUN, list_of_args) {
@@ -28,7 +30,7 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
   # First element of list_of_args will be the word "list" -- replace with
   # colData
   list_of_args[[1]] <- colData(.data) %>%
-    dplyr::as_tibble() %>%
+    as_tibble() %>%
 
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
@@ -38,7 +40,7 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
   modded_colData <- do.call(FUN, args = list_of_args)
 
   # Subset columns of assay data by rows of colData
-  modded_assay_list <- purrr::map(
+  modded_assay_list <- map(
     .x = as.list(assays(.data)),
     ~ .x[, modded_colData$id_helper_QjWTNFtWmSBc8XS]
     )
@@ -52,7 +54,9 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
     )
 }
 
+#' @importFrom dplyr as_tibble
 #' @importFrom dplyr n
+#' @importFrom purrr map
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment rowData
 tidy_rowData_helper <- function(.data, FUN, list_of_args) {
@@ -60,7 +64,7 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
   # First element of list_of_args will be the word "list" -- replace with
   # rowData
   list_of_args[[1]] <- rowData(.data) %>%
-    dplyr::as_tibble() %>%
+    as_tibble() %>%
 
     # Add columns of indices that will be used to subset assay columns
     # Use a name that is unlikely to appear in colData
@@ -70,7 +74,7 @@ tidy_rowData_helper <- function(.data, FUN, list_of_args) {
   modded_rowData <- do.call(FUN, args = list_of_args)
 
   # Subset columns of assay data by rows of colData
-  modded_assay_list <- purrr::map(
+  modded_assay_list <- map(
     .x = as.list(assays(.data)),
     ~ .x[modded_rowData$id_helper_QjWTNFtWmSBc8XS, ]
     )
