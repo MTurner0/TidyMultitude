@@ -4,21 +4,20 @@
 \alias{intersect_colData}
 \title{Keep biological units based on matching factors in \code{colData}}
 \usage{
-intersect_colData(.data, experiment1, experiment2, by)
+intersect_colData(.data, by)
 }
 \arguments{
-\item{.data}{A MultiAssayExperiment object.}
-
-\item{experiment1}{A SummarizedExperiment within \code{.data}.}
-
-\item{experiment2}{Another SummarizedExperiment within \code{.data}.}
+\item{.data}{A \code{MultiAssayExperiment} object.}
 
 \item{by}{A vector of \code{colData} features (i.e. column names) to match units
-by.}
+by. The column names must appear in the \code{colData} for each experiment.}
+}
+\value{
+A \code{MultiAssayExperiment} whose experiments all contain \code{colData} with
+matching features.
 }
 \description{
 \code{MultiAssayExperiment::intersectColumns()} only works if the
 experiments have the same IDs within the \code{sampleMap}. This function will
-use \code{colData} features to match biological units (currently only supports
-two experiments).
+use \code{colData} features to match biological units.
 }

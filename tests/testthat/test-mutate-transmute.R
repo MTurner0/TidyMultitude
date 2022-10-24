@@ -10,8 +10,7 @@ test_that("Subsetting data on Summarized Experiment", {
 test_that("Adding a new Assay to Summarized Experiment", {
   data("mae")
   mae2=mae %>% mutate(cyto, plus_one = cyto_conc + 1)
-
-  expect_equal(c(assayNames(mae2[[2]])), c("cyto_conc", "plus_one"))
+  expect_equal(c(SummarizedExperiment::assayNames(mae2[[2]])), c("cyto_conc", "plus_one"))
 })
 
 #Testing transmute function
@@ -27,5 +26,5 @@ test_that("Subsetting data on Summarized Experiment while dropping rest of summa
 test_that("Adding new assay and drops existing assays from Summarized Experiment", {
   data("mae")
   mae4=mae %>% transmute(cyto, plus_one = cyto_conc + 1)
-  expect_equal(c(assayNames(mae4[[2]])), c("plus_one"))
+  expect_equal(c(SummarizedExperiment::assayNames(mae4[[2]])), c("plus_one"))
 })

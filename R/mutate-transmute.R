@@ -6,12 +6,11 @@
 #'
 #' @description `mutate()` adds new assays and preserves existing ones.
 #'   `transmute()` adds new assays and drops existing ones. New assays overwrite
-#'   existing assays of the same name. 
+#'   existing assays of the same name.
 #'
 #' @seealso \code{\link[dplyr:mutate]{dplyr::mutate}}
-#' @rdname mutate
 #' @name mutate
-#' 
+#'
 NULL
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,35 +19,34 @@ NULL
 
 #' @importFrom dplyr mutate
 #' @export
-mutate.MultiAssayExperiment <- function(.data, experiment, ..., .keep = c("all", "none")) {
+mutate.MultiAssayExperiment <- function(
+    .data, experiment, ..., .keep = c("all", "none")
+    ) {
   if (missing(.keep)) {
     .keep <- "all"
   }
-  
+
   mutate_quosures <- dplyr:::dplyr_quosures(...)
-  
+
   # Operate on SEs within MAE
   if (missing(experiment)) {
     return(quosure_helper(.data, mutate_quosures, .keep))
-  }
-  
-  # Operate on assays within SE
-  else {
+  } else { # Operate on assays within SE
     experiment_name <- paste0(substitute(experiment))
     .data[[experiment_name]] <- quosure_helper(
       .data[[experiment_name]], mutate_quosures, .keep
       )
-    return(.data) 
+    return(.data)
   }
 }
 
 #' @importFrom dplyr mutate
 #' @export
 mutate.SummarizedExperiment <- function(.data, ..., .keep = c("all", "none")) {
-  if(missing(.keep)) {
+  if (missing(.keep)) {
     .keep <- "all"
   }
-  
+
   mutate_quosures <- dplyr:::dplyr_quosures(...)
   quosure_helper(.data, mutate_quosures, .keep)
 }
@@ -57,21 +55,18 @@ mutate.SummarizedExperiment <- function(.data, ..., .keep = c("all", "none")) {
 #' @export
 transmute.MultiAssayExperiment <- function(.data, experiment, ...) {
   mutate_quosures <- dplyr:::dplyr_quosures(...)
-  
+
   # Operate on SEs within MAE
   if (missing(experiment)) {
     return(quosure_helper(.data, mutate_quosures, .keep = "none"))
-  }
-  
-  # Operate on assays within SE
-  else {
+  } else { # Operate on assays within SE
     experiment_name <- paste0(substitute(experiment))
     .data[[experiment_name]] <- quosure_helper(
       .data[[experiment_name]], mutate_quosures, .keep = "none"
     )
-    return(.data) 
+    return(.data)
   }
-  
+
 }
 
 #' @importFrom dplyr transmute
@@ -81,8 +76,10 @@ transmute.SummarizedExperiment <- function(.data, ...) {
   quosure_helper(.data, mutate_quosures, .keep = "none")
 }
 
+#' @noRd
 #' @export
 dplyr::mutate
 
+#' @noRd
 #' @export
 dplyr::transmute

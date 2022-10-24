@@ -14,11 +14,10 @@
 #'   \itemize{\item `colData`, `rowData`, and `assay`s of selected experiments
 #'   are not affected. \item Output experiments are a subset of input
 #'   experiments, potentially with a different order.}
-#'   
+#'
 #' @seealso \code{\link[dplyr:select]{dplyr::select}}
-#' @rdname select
 #' @name select
-#' 
+#'
 NULL
 
 #' @title Extract a single `SummarizedExperiment`.
@@ -38,9 +37,8 @@ NULL
 #' @return A `SummarizedExperiment`.
 #'
 #' @seealso \code{\link[dplyr:pull]{dplyr::pull}}
-#' @rdname pull
 #' @name pull
-#'   
+#'
 NULL
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,8 +49,8 @@ NULL
 #' @export
 select.MultiAssayExperiment <- function(.data, ...) {
   # Convert `...` into a vector of strings of experiment names
-  experiment_vector <- rlang::quos(...) %>% 
-    purrr::map(rlang::quo_text) %>% 
+  experiment_vector <- rlang::quos(...) %>%
+    purrr::map(rlang::quo_text) %>%
     unlist()
   return(suppressWarnings(.data[, , experiment_vector]))
 }
@@ -64,16 +62,18 @@ pull.MultiAssayExperiment <- function(.data, var = -1) {
   if(is.symbol(name)) {
     var <- paste0(name)
   }
-  if(is.numeric(var) & var < 0) {
-    
+  if(is.numeric(var) && var < 0) {
+
     # Convert negative index to positive index
     var <- experiments(.data) %>% length() + 1 + var
   }
   return(.data[[var]])
 }
 
+#' @noRd
 #' @export
 dplyr::select
 
+#' @noRd
 #' @export
 dplyr::pull
