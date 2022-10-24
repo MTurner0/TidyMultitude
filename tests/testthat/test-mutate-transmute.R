@@ -10,7 +10,6 @@ test_that("Subsetting data on Summarized Experiment", {
 test_that("Adding a new Assay to Summarized Experiment", {
   data("mae")
   mae2=mae %>% mutate(cyto, plus_one = cyto_conc + 1)
-  
   expect_equal(c(SummarizedExperiment::assayNames(mae2[[2]])), c("cyto_conc", "plus_one"))
 })
 
