@@ -15,6 +15,9 @@ trim_empty_rows(.data, experiment, counts = TRUE)
 \arguments{
 \item{.data}{Either a \code{MultiAssayExperiment} or a \code{SummarizedExperiment}.}
 
+\item{experiment}{If \code{.data} is a \code{MultiAssayExperiment}, choose which
+experiment to remove missing values from.}
+
 \item{counts}{If \code{TRUE}, empty rows can be checked using \code{rowSums(x) > 0},
 which is faster than \code{any(x != 0)}.}
 }

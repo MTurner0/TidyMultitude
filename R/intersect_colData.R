@@ -1,6 +1,6 @@
 #' @title Keep biological units based on matching factors in `colData`
 #'
-#' @description `MultiAssayExperiment::intersectColumns()` only works if the
+#' @description [MultiAssayExperiment::intersectColumns()] only works if the
 #'   experiments have the same IDs within the `sampleMap`. This function will
 #'   use `colData` features to match biological units.
 #'

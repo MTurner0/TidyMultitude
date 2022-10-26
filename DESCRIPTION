@@ -1,30 +1,35 @@
 Package: TidyMultitude
-Title: Streamline Analysis of Multi-Omics Data
+Title: Toolkit for Multi-Omics Data Wrangling
 Version: 0.0.0.9000
-Authors@R: 
-    person("Margaret", "Turner", email = "margaret.turner1416@gmail.com", 
-           role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person("Margaret", "Turner", email = "margaret.turner1416@gmail.com", role = c("aut", "cre")),
+    person("Kris", "Sankaran", email = "ksankaran@wisc.edu", role = "aut", comment = c(ORCID = "0000-0002-9415-1971")),
+    person("Harshita", "Narayanan", role = "aut")
+    )
+Description: "TidyMultitude" is an R package providing dplyr-like tools for 
+        manipulation of MultiAssayExperiment and SummarizedExperiment objects.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
-Imports: 
-    tidyverse,
+Imports:
+    dplyr,
+    purrr,
     MultiAssayExperiment,
     rlang,
-    phyloseq,
-    magrittr,
-    ade4
+    SummarizedExperiment
 Depends: 
     R (>= 2.10)
 LazyData: true
-Suggests: 
+Suggests:
+    phyloseq,
+    magrittr,
+    ade4,
     curatedTCGAData,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    kableExtra,
+    ggplot2
 VignetteBuilder: knitr
 Config/testthat/edition: 3

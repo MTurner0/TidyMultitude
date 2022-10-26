@@ -12,6 +12,9 @@
 #'   These results are stored in the `cyto_conc` assay in the `cyto`
 #'   `SummarizedExperiment`.
 #'
+#'   (The data within this `MultiAssayExperiment` is entirely fabricated. It
+#'   exists as a "toy" example of a `MultiAssayExperiment`.)
+#'
 #' @examples
 #' print(mae)
 "mae"

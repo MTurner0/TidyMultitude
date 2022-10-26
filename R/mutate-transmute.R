@@ -2,15 +2,33 @@
 # Documentation
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' @title Create, modify, and delete assays or `SummarizedExperiments`
+#' @title Create, modify, and delete experiments or assays
 #'
-#' @description `mutate()` adds new assays and preserves existing ones.
-#'   `transmute()` adds new assays and drops existing ones. New assays overwrite
-#'   existing assays of the same name.
+#' @description When operating on `MultiAssayExperiment`s, `mutate()` adds new
+#'   experiments and preserves existing ones; `transmute()` adds new experiments
+#'   and drops existing ones. New experiments overwrite existing experiments of
+#'   the same name.
 #'
-#' @seealso \code{\link[dplyr:mutate]{dplyr::mutate}}
+#'   When operating on experiments, `mutate()` adds new assays and preserves
+#'   existing ones; `transmute()` adds new assays and drops existing ones. New
+#'   assays overwrite existing assays of the same name.
+#'
+#' @param `.data` A `MultiAssayExperiment` or `SummarizedExperiment`.
+#'
+#' @param `experiment` If `.data` is a `MultiAssayExperiment`, then this
+#'   argument selects an experiment on which to perform assay manipulations.
+#'
+#' @param `...` <[dplyr::dplyr_data_masking()]>
+#'   Name-value pairs. The name gives the name of the experiment or assay in the
+#'   output. The value can be: \itemize{ \item When operating on
+#'   `MultiAssayExperiment`s, an experiment compatible with the
+#'   [MultiAssayExperiment::ExperimentList-class]
+#'   container. \item When operating  on `SummarizedExperiment`s, an matrix with
+#'   the dimensions of the `SummarizedExperiment`.}
+#'
+#' @seealso [dplyr::mutate()] [dplyr::transmute()]
 #' @name mutate
-#'
+#'   
 NULL
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -19,5 +19,5 @@ experiments, potentially with a different order.}
 Select \code{SummarizedExperiment}s in a \code{MultiAssayExperiment}.
 }
 \seealso{
-\code{\link[dplyr:select]{dplyr::select}}
+\code{\link[dplyr:select]{dplyr::select()}}
 }

@@ -6,6 +6,8 @@
 #'   a Summarized Experiment.
 #'
 #' @param .data Either a `MultiAssayExperiment` or a `SummarizedExperiment`.
+#' @param experiment If `.data` is a `MultiAssayExperiment`, choose which
+#'   experiment to remove missing values from.
 #' @param counts If `TRUE`, empty rows can be checked using `rowSums(x) > 0`,
 #'   which is faster than `any(x != 0)`.
 #'
@@ -25,8 +27,8 @@ trim_empty_rows.MultiAssayExperiment <- function(
 }
 
 #' @rdname trim_empty_rows
-#' @importFrom SummarizedExperiment colData
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom purrr map
+#' @importFrom SummarizedExperiment colData rowData
 #' @export
 trim_empty_rows.SummarizedExperiment <- function(.data, counts = TRUE) {
   # Create a vector identifying rows
@@ -49,7 +51,7 @@ trim_empty_rows.SummarizedExperiment <- function(.data, counts = TRUE) {
 
   new_rowdata <- rowData(.data)[nonempty_indices, ]
 
-  new_assay_list <- purrr::map(
+  new_assay_list <- map(
     .x = as.list(assays(.data)),
     ~ .x[nonempty_indices, ]
     )

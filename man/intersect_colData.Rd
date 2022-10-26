@@ -17,7 +17,7 @@ A \code{MultiAssayExperiment} whose experiments all contain \code{colData} with
 matching features.
 }
 \description{
-\code{MultiAssayExperiment::intersectColumns()} only works if the
+\code{\link[MultiAssayExperiment:MultiAssayExperiment-helpers]{MultiAssayExperiment::intersectColumns()}} only works if the
 experiments have the same IDs within the \code{sampleMap}. This function will
 use \code{colData} features to match biological units.
 }

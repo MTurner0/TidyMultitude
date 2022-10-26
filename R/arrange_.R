@@ -6,6 +6,7 @@
 #'
 #' @param .data Either a `MultiAssayExperiment` or `SummarizedExperiment`
 #'   object.
+#' @param ... Columns in `colData` to arrange by.
 #'
 #' @export
 arrange_colData <- function(.data, ...) {
@@ -36,8 +37,13 @@ arrange_colData.SummarizedExperiment <- function(.data, ...) {
 
 #' @title Arrange rows of a `MultiAssayExperiment` or `SummarizedExperiment`
 #'
+#' @description Allow rows of assays within a `MultiAssayExperiment` or
+#' `SummarizedExperiment` to be rearranged by the observations of their
+#' `rowData`.
+#'
 #' @param .data Either a `MultiAssayExperiment` or `SummarizedExperiment`
 #'   object.
+#' @param ... Columns in `rowData` to arrange by.
 #'
 #' @export
 arrange_rowData <- function(.data, ...) {
