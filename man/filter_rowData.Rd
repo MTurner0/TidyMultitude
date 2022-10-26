@@ -6,20 +6,35 @@
 \alias{filter_rowData.SummarizedExperiment}
 \title{Subset columns of \code{SummarizedExperiment}s by rows of \code{rowData}.}
 \usage{
-filter_rowData(.data, ...)
+filter_rowData(.data, experiment, ...)
 
-\method{filter_rowData}{MultiAssayExperiment}(.data, ...)
+\method{filter_rowData}{MultiAssayExperiment}(.data, experiment, ...)
 
 \method{filter_rowData}{SummarizedExperiment}(.data, ...)
 }
 \arguments{
 \item{.data}{A \code{SummarizedExperiment} or \code{MultiAssayExperiment}.}
 
-\item{...}{Expressions that return
-a logical value, and are defined in terms of the variables in \code{.data}. If
-multiple expressions are included, they are combined with the \code{&} operator.
-Only rows for which all conditions evaluate to \code{TRUE} are kept.}
+\item{...}{Expressions that return a logical value, and are defined in terms
+of the variables in \code{.data}. If multiple expressions are included, they are
+combined with the \code{&} operator. Only rows for which all conditions evaluate
+to \code{TRUE} are kept.}
+
+\item{`experiment`}{If \code{.data} is a \code{MultiAssayExperiment}, the experiment to
+operate upon must be specified.}
+}
+\value{
+An object of the same class as \code{.data}.
 }
 \description{
-Subset columns of \code{SummarizedExperiment}s by rows of \code{rowData}.
+Subsets \code{rowData}, retaining only rows that produce a value of
+\code{TRUE} for all conditions. The rows of \code{assay} data are then subset to
+match. Unlike \code{colData}, \code{rowData} is experiment-specific, so only a single
+experiment can be operated on at a time.
+}
+\examples{
+mae \%>\%
+  filter_rowData(phy16S, Class == "Bacilli") \%>\%
+  filter_rowData(cyto, cytokine \%in\% c("IFN-g", "TNF-a"))
+
 }

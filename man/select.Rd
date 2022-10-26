@@ -2,21 +2,28 @@
 % Please edit documentation in R/select-pull.R
 \name{select}
 \alias{select}
-\title{Subset a \code{MultiAssayExperiment} by \code{SummarizedExperiment}s.}
+\title{Subset a \code{MultiAssayExperiment} by experiments.}
 \arguments{
 \item{.data}{A \code{MultiAssayExperiment}.}
 
-\item{...}{The names of the \code{SummarizedExperiment}s to be kept, unquoted.}
+\item{...}{The names of the experiments to be kept, unquoted.}
 }
 \value{
 A \code{MultiAssayExperiment} containing the selected
 \code{SummarizedExperiment}s. The output has the following properties:
-\itemize{\item \code{colData}, \code{rowData}, and \code{assay}s of selected experiments
-are not affected. \item Output experiments are a subset of input
-experiments, potentially with a different order.}
+\itemize{\item Attributes of selected experiments (e.g. \code{colData},
+\code{rowData}, and \code{assay}s for \code{SummarizedExperiment} objects) are not
+affected. \item Output experiments are a subset of input experiments,
+potentially with a different order.}
 }
 \description{
-Select \code{SummarizedExperiment}s in a \code{MultiAssayExperiment}.
+Select experiments in a \code{MultiAssayExperiment}.
+}
+\examples{
+# Return a MultiAssayExperiment object containing only 
+# the SummarizedExperiment cyto
+mae \%>\% select(cyto)
+
 }
 \seealso{
 \code{\link[dplyr:select]{dplyr::select()}}

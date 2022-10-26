@@ -3,13 +3,15 @@
 #' @description Sequencing data often produces large but sparse matrices. To
 #'   save space and time, it may be worthwhile to remove empty columns and/or
 #'   rows. Note that a row will only be removed if it is empty for all assays in
-#'   a Summarized Experiment.
+#'   a `SummarizedExperiment`.
 #'
 #' @param .data Either a `MultiAssayExperiment` or a `SummarizedExperiment`.
 #' @param experiment If `.data` is a `MultiAssayExperiment`, choose which
 #'   experiment to remove missing values from.
 #' @param counts If `TRUE`, empty rows can be checked using `rowSums(x) > 0`,
 #'   which is faster than `any(x != 0)`.
+#' 
+#' @return An object of the same class as `.data`.
 #'
 #' @export
 trim_empty_rows <- function(.data, experiment, counts = TRUE) {
@@ -22,6 +24,9 @@ trim_empty_rows.MultiAssayExperiment <- function(
     .data, experiment, counts = TRUE
     ) {
   exp_name <- paste0(substitute(experiment))
+  if (!(exp_name %in% names(.data))) {
+    stop("Invalid experiment name.")
+  }
   .data[[exp_name]] <- trim_empty_rows(.data[[exp_name]], counts = counts)
   return(.data)
 }
