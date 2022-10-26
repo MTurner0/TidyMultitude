@@ -2,24 +2,36 @@
 % Please edit documentation in R/select-pull.R
 \name{pull}
 \alias{pull}
-\title{Extract a single \code{SummarizedExperiment}.}
+\title{Extract a single experiment.}
 \arguments{
-\item{.data}{A \code{MultiAssayExperiment} containing at least one
-\code{SummarizedExperiment}.}
+\item{.data}{A \code{MultiAssayExperiment} containing at least one experiment.}
 
 \item{var}{A variable specified as: \itemize{ \item a literal experiment
 name; \item a positive integer, giving the position of the experiment
 counting from the top; \item a negative integer, giving the position of the
 experiment counting from the bottom. } The default returns the last
-experiment. If there is only one experiment (e.g. if \code{\link{select}}
+experiment. If there is only one experiment (e.g. if \code{\link[=select]{select()}}
 has been used to select a single experiment from the
 \code{MultiAssayExperiment}), then this will be chosen.}
 }
 \value{
-A \code{SummarizedExperiment}.
+An experiment.
 }
 \description{
 \code{pull()} is similar to \verb{[[]]}.
+}
+\examples{
+names(mae)
+# [1] "phy16S" "cyto"
+
+# Both of the lines below would return only the cyto SummarizedExperiment
+mae \%>\% pull(cyto)
+mae \%>\% pull()
+
+# Both of the lines below would return only the phy16S SummarizedExperiment
+mae \%>\% pull(phy16S)
+mae \%>\% pull(1)
+
 }
 \seealso{
 \code{\link[dplyr:pull]{dplyr::pull()}}

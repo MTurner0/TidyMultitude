@@ -18,15 +18,25 @@
 #' @param `experiment` If `.data` is a `MultiAssayExperiment`, then this
 #'   argument selects an experiment on which to perform assay manipulations.
 #'
-#' @param `...` <[dplyr::dplyr_data_masking()]>
-#'   Name-value pairs. The name gives the name of the experiment or assay in the
-#'   output. The value can be: \itemize{ \item When operating on
-#'   `MultiAssayExperiment`s, an experiment compatible with the
-#'   [MultiAssayExperiment::ExperimentList-class]
-#'   container. \item When operating  on `SummarizedExperiment`s, an matrix with
-#'   the dimensions of the `SummarizedExperiment`.}
+#' @param `...` <[dplyr::dplyr_data_masking()]> Name-value pairs. The name gives
+#'   the name of the experiment or assay in the output. The value can be:
+#'   \itemize{ \item When operating on `MultiAssayExperiment`s, an experiment
+#'   compatible with the [MultiAssayExperiment::ExperimentList-class] container.
+#'   \item When operating  on `SummarizedExperiment`s, an matrix with the
+#'   dimensions of the `SummarizedExperiment`.}
 #'
 #' @seealso [dplyr::mutate()] [dplyr::transmute()]
+#'
+#' @examples
+#' # Operates on the `cyto` SummarizedExperiment to add a new
+#' # SummarizedExperiment (i.e. `subset`) to the MultiAssayExperiment
+#' mae %>% mutate(subset = cyto[1:5, 1:3])
+#' 
+#' # Operates on the `cyto_conc` assay within the `cyto` SummarizedExperiment
+#' # to add a new assay (i.e. `plus_one`) to `cyto`, within the
+#' # MultiAssayExperiment
+#' mae %>% mutate(cyto, plus_one = cyto_conc + 1)
+#'
 #' @name mutate
 #'   
 NULL

@@ -12,6 +12,9 @@
 #' @return A `MultiAssayExperiment` whose experiments all contain `colData` with
 #'   matching features.
 #'
+#' @examples
+#' intersect_colData(mae, by = c("Patient", "Visit"))
+#'
 #' @importFrom purrr reduce
 #' @export
 intersect_colData <- function(.data, by) {

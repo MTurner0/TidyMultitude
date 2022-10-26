@@ -6,9 +6,9 @@
 \alias{arrange_rowData.SummarizedExperiment}
 \title{Arrange rows of a \code{MultiAssayExperiment} or \code{SummarizedExperiment}}
 \usage{
-arrange_rowData(.data, ...)
+arrange_rowData(.data, experiment, ...)
 
-\method{arrange_rowData}{MultiAssayExperiment}(.data, ...)
+\method{arrange_rowData}{MultiAssayExperiment}(.data, experiment, ...)
 
 \method{arrange_rowData}{SummarizedExperiment}(.data, ...)
 }
@@ -17,9 +17,16 @@ arrange_rowData(.data, ...)
 object.}
 
 \item{...}{Columns in \code{rowData} to arrange by.}
+
+\item{`experiment`}{If \code{.data} is a \code{MultiAssayExperiment}, the experiment to
+operate upon must be specified.}
+}
+\value{
+An object of the same class as \code{.data}.
 }
 \description{
 Allow rows of assays within a \code{MultiAssayExperiment} or
 \code{SummarizedExperiment} to be rearranged by the observations of their
-\code{rowData}.
+\code{rowData}. Unlike \code{colData}, \code{rowData} is experiment-specific, so only a
+single experiment can be operated on at a time.
 }

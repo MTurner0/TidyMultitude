@@ -18,6 +18,9 @@ object.}
 
 \item{...}{Columns in \code{colData} to arrange by.}
 }
+\value{
+An object of the same class as \code{.data}.
+}
 \description{
 Allow columns of assays within a \code{MultiAssayExperiment} or
 \code{SummarizedExperiment} to be rearranged by the observations of their

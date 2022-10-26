@@ -15,13 +15,22 @@ filter_colData(.data, ...)
 \arguments{
 \item{.data}{A \code{SummarizedExperiment} or \code{MultiAssayExperiment}.}
 
-\item{...}{Expressions that return
-a logical value, and are defined in terms of the variables in \code{.data}. If
-multiple expressions are included, they are combined with the \code{&} operator.
-Only rows for which all conditions evaluate to \code{TRUE} are kept.}
+\item{...}{Expressions that return a logical value, and are defined in terms
+of the variables in \code{.data}. If multiple expressions are included, they are
+combined with the \code{&} operator. Only rows for which all conditions evaluate
+to \code{TRUE} are kept.}
+}
+\value{
+An object of the same class as \code{.data}.
 }
 \description{
 Subsets \code{colData}, retaining only rows that produce a value of
 \code{TRUE} for all conditions. The columns of \code{assay} data are then subset to
-match.
+match. For a \code{MultiAssayExperiment}, this subsetting will be applied to all
+of its experiments.
+}
+\examples{
+# For all experiments, keep only sample data collected at the first visit.
+filter_colData(mae, Visit == 1)
+
 }

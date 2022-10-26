@@ -21,3 +21,7 @@ matching features.
 experiments have the same IDs within the \code{sampleMap}. This function will
 use \code{colData} features to match biological units.
 }
+\examples{
+intersect_colData(mae, by = c("Patient", "Visit"))
+
+}
