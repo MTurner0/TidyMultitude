@@ -15,7 +15,11 @@ arrange_rowData(.data, ...)
 \arguments{
 \item{.data}{Either a \code{MultiAssayExperiment} or \code{SummarizedExperiment}
 object.}
+
+\item{...}{Columns in \code{rowData} to arrange by.}
 }
 \description{
-Arrange rows of a \code{MultiAssayExperiment} or \code{SummarizedExperiment}
+Allow rows of assays within a \code{MultiAssayExperiment} or
+\code{SummarizedExperiment} to be rearranged by the observations of their
+\code{rowData}.
 }

@@ -22,6 +22,9 @@ assay in the \code{phy16S} \code{SummarizedExperiment}.
 On visits 1, 3, and 5, the concentrations of 8 cytokines were measured.
 These results are stored in the \code{cyto_conc} assay in the \code{cyto}
 \code{SummarizedExperiment}.
+
+(The data within this \code{MultiAssayExperiment} is entirely fabricated. It
+exists as a "toy" example of a \code{MultiAssayExperiment}.)
 }
 \examples{
 print(mae)

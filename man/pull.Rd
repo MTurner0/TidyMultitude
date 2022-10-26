@@ -22,5 +22,5 @@ A \code{SummarizedExperiment}.
 \code{pull()} is similar to \verb{[[]]}.
 }
 \seealso{
-\code{\link[dplyr:pull]{dplyr::pull}}
+\code{\link[dplyr:pull]{dplyr::pull()}}
 }

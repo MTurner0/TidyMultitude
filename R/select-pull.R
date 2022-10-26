@@ -15,7 +15,7 @@
 #'   are not affected. \item Output experiments are a subset of input
 #'   experiments, potentially with a different order.}
 #'
-#' @seealso \code{\link[dplyr:select]{dplyr::select}}
+#' @seealso [dplyr::select()]
 #' @name select
 #'
 NULL
@@ -36,7 +36,7 @@ NULL
 #'
 #' @return A `SummarizedExperiment`.
 #'
-#' @seealso \code{\link[dplyr:pull]{dplyr::pull}}
+#' @seealso [dplyr::pull()]
 #' @name pull
 #'
 NULL

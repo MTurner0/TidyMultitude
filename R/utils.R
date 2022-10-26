@@ -20,11 +20,9 @@ scale_rowwise <- function(x, center = TRUE, scale = TRUE) {
 # Helpers for colData and rowData operations
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' @importFrom dplyr as_tibble
-#' @importFrom dplyr n
+#' @importFrom dplyr as_tibble n
 #' @importFrom purrr map
-#' @importFrom SummarizedExperiment colData
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom SummarizedExperiment colData rowData
 tidy_colData_helper <- function(.data, FUN, list_of_args) {
 
   # First element of list_of_args will be the word "list" -- replace with
@@ -54,11 +52,9 @@ tidy_colData_helper <- function(.data, FUN, list_of_args) {
     )
 }
 
-#' @importFrom dplyr as_tibble
-#' @importFrom dplyr n
+#' @importFrom dplyr as_tibble n
 #' @importFrom purrr map
-#' @importFrom SummarizedExperiment colData
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom SummarizedExperiment colData rowData
 tidy_rowData_helper <- function(.data, FUN, list_of_args) {
 
   # First element of list_of_args will be the word "list" -- replace with
@@ -148,8 +144,7 @@ quosure_helper.SummarizedExperiment <- function(
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' @importFrom SummarizedExperiment colData
-#' @importFrom dplyr as_tibble
-#' @importFrom dplyr n
+#' @importFrom dplyr as_tibble n
 intersect_ELs <- function(EL1, EL2, by) {
 
   indices <- merge(colData(EL1[[1]]) %>%

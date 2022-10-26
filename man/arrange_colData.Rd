@@ -15,6 +15,8 @@ arrange_colData(.data, ...)
 \arguments{
 \item{.data}{Either a \code{MultiAssayExperiment} or \code{SummarizedExperiment}
 object.}
+
+\item{...}{Columns in \code{colData} to arrange by.}
 }
 \description{
 Allow columns of assays within a \code{MultiAssayExperiment} or

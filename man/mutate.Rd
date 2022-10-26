@@ -2,12 +2,31 @@
 % Please edit documentation in R/mutate-transmute.R
 \name{mutate}
 \alias{mutate}
-\title{Create, modify, and delete assays or \code{SummarizedExperiments}}
+\title{Create, modify, and delete experiments or assays}
+\arguments{
+\item{`.data`}{A \code{MultiAssayExperiment} or \code{SummarizedExperiment}.}
+
+\item{`experiment`}{If \code{.data} is a \code{MultiAssayExperiment}, then this
+argument selects an experiment on which to perform assay manipulations.}
+
+\item{`...`}{<\code{\link[dplyr:dplyr_data_masking]{dplyr::dplyr_data_masking()}}>
+Name-value pairs. The name gives the name of the experiment or assay in the
+output. The value can be: \itemize{ \item When operating on
+\code{MultiAssayExperiment}s, an experiment compatible with the
+\link[MultiAssayExperiment:ExperimentList-class]{MultiAssayExperiment::ExperimentList}
+container. \item When operating  on \code{SummarizedExperiment}s, an matrix with
+the dimensions of the \code{SummarizedExperiment}.}}
+}
 \description{
-\code{mutate()} adds new assays and preserves existing ones.
-\code{transmute()} adds new assays and drops existing ones. New assays overwrite
-existing assays of the same name.
+When operating on \code{MultiAssayExperiment}s, \code{mutate()} adds new
+experiments and preserves existing ones; \code{transmute()} adds new experiments
+and drops existing ones. New experiments overwrite existing experiments of
+the same name.
+
+When operating on experiments, \code{mutate()} adds new assays and preserves
+existing ones; \code{transmute()} adds new assays and drops existing ones. New
+assays overwrite existing assays of the same name.
 }
 \seealso{
-\code{\link[dplyr:mutate]{dplyr::mutate}}
+\code{\link[dplyr:mutate]{dplyr::mutate()}} \code{\link[dplyr:mutate]{dplyr::transmute()}}
 }
