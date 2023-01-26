@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(TidyMultitude)
+library(maeplyr)
 
-test_check("TidyMultitude")
+test_check("maeplyr")

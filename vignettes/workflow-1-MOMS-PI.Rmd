@@ -22,13 +22,13 @@ library(phyloseq)
 library(knitr)
 library(kableExtra)
 
-library(TidyMultitude)
+library(maeplyr)
 ```
 
-This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `TidyMultitude`.
+This vignette reproduces the **Multi-omics data integration: MOMS-PI example** section from the [Working with open-source Human Microbiome Project Data phases 1 (HMP) and 2 (iHMP): Efficient Data Access and Analysis Workflow](http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/) workshop, demonstrating how the pre-processing steps can be simplified using `maeplyr`.
 
 First, we will walk through the steps of the workflow used in the HMP workshop. 
-Then, we will demonstrate how these steps can be simplified using `TidyMultitude`.
+Then, we will demonstrate how these steps can be simplified using `maeplyr`.
 
 ## Setup
 
@@ -63,9 +63,9 @@ momspi16S_phyloseq
 ```
 
 
-### Objects for TidyMultitude workflow
+### Objects for maeplyr workflow
 
-For the TidyMultitude workflow, we will need a `MultiAssayExperiment` object containing `SummarizedExperiment` objects representing the cytokine and 16S rRNA data, respectively.
+For the maeplyr workflow, we will need a `MultiAssayExperiment` object containing `SummarizedExperiment` objects representing the cytokine and 16S rRNA data, respectively.
 `MultiAssayExperiment` objects cannot contain `phyloseq` objects, so we must make a `SummarizedExperiment` for our 16S rRNA data.
 
 ```{r}
@@ -231,7 +231,7 @@ plot1 <- PlotCoinVars(
 plot1
 ```
 
-## TidyMultitude workflow
+## maeplyr workflow
 
 First, we will create a function that we can use later in `transmute()`. This function centers (and optionally scales) a transposed matrix then performs the same total-variance normalization used in the HMP workshop.
 
@@ -314,7 +314,7 @@ kable(head(coin$li),
 
 
 ```{r, echo=FALSE}
-plot2 <- PlotCoinVars(coin, title = "TidyMultitude workflow",
+plot2 <- PlotCoinVars(coin, title = "maeplyr workflow",
              tab1 = "taxa", tab2 = "cytokines",
              Labels1 = NULL,
              Labels2 = rownames(coin$li),

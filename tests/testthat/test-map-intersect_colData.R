@@ -9,13 +9,13 @@ exp <- curatedTCGAData(
 test_by <- exp %>% colData() %>% colnames()
 
 test_that("Local colData initially empty", {
-  expect_false(TidyMultitude:::has_local_colData(exp))
+  expect_false(has_local_colData(exp))
 })
 
 exp <- map_colData(exp)
 
 test_that("Local colData filled by map_colData", {
-  expect_true(TidyMultitude:::has_local_colData(exp))
+  expect_true(has_local_colData(exp))
 })
 
 after <- intersect_colData(exp, by = test_by)
