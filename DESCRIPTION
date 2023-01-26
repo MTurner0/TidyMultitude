@@ -1,4 +1,4 @@
-Package: TidyMultitude
+Package: maeplyr
 Title: Toolkit for Multi-Omics Data Wrangling
 Version: 0.0.0.9000
 Authors@R: c(
@@ -6,12 +6,12 @@ Authors@R: c(
     person("Kris", "Sankaran", email = "ksankaran@wisc.edu", role = "aut", comment = c(ORCID = "0000-0002-9415-1971")),
     person("Harshita", "Narayanan", role = "aut")
     )
-Description: "TidyMultitude" is an R package providing dplyr-like tools for 
+Description: "maeplyr" is an R package providing dplyr-like tools for 
         manipulation of MultiAssayExperiment and SummarizedExperiment objects.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Imports:
     dplyr,
     purrr,
